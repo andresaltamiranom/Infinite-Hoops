@@ -27,7 +27,7 @@ class GameScene: SKScene {
     
     override func didMove(to view: SKView) {
         addChild(worldNode)
-        self.backgroundColor = SKColor.orange
+        self.backgroundColor = UIColor.init(hex: 0x2195d1)
         createLabels()
         createBall()
     }
