@@ -17,6 +17,7 @@ extension GameScene {
         tapAnywhereToPlayLabel.fontSize = size.width / 25
         tapAnywhereToPlayLabel.position = CGPoint(x: size.width * 0.5, y: size.height * 0.3)
         tapAnywhereToPlayLabel.isHidden = false
+        menuElements.append(tapAnywhereToPlayLabel)
         addChild(tapAnywhereToPlayLabel)
         
         tapToPauseAndRecalibrateLabel.text = "Once the game starts, tap to pause and recalibrate"
@@ -25,6 +26,7 @@ extension GameScene {
         tapToPauseAndRecalibrateLabel.fontSize = size.width / 37.5
         tapToPauseAndRecalibrateLabel.position = CGPoint(x: size.width * 0.5, y: size.height * 0.6)
         tapToPauseAndRecalibrateLabel.isHidden = false
+        menuElements.append(tapToPauseAndRecalibrateLabel)
         addChild(tapToPauseAndRecalibrateLabel)
     }
     

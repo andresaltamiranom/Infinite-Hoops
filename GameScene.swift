@@ -14,6 +14,10 @@ class GameScene: SKScene {
     
     let worldNode = SKNode()
     
+    var gameStarted = false
+    
+    var menuElements: [SKNode] = []
+    
     // Sprites
     let ball = SKSpriteNode(imageNamed: "ball")
     
@@ -25,10 +29,22 @@ class GameScene: SKScene {
         addChild(worldNode)
         self.backgroundColor = SKColor.orange
         createLabels()
+        createBall()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
+        for touch in touches {
+            let location = touch.location(in: self)
+            
+            if !gameStarted {
+                // start the game
+                gameStarted = true
+                
+                for element in menuElements {
+                    element.removeFromParent()
+                }
+            }
+        }
     }
     
     override func update(_ currentTime: TimeInterval) {
