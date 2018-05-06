@@ -21,6 +21,7 @@ class GameScene: SKScene {
     let tapToPauseAndRecalibrateLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     let tapAnywhereToPlayLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     let pausedLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
+    let scoreLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     
     // Constant values
     let ballSpeed: Double = 25.0
@@ -30,6 +31,7 @@ class GameScene: SKScene {
     var canPlay = true
     var gameStarted = false
     var gameIsPaused = false
+    var score: Int = 0
     
     var menuElements: [SKNode] = []
     
@@ -78,7 +80,13 @@ class GameScene: SKScene {
                         for element in menuElements {
                             element.removeFromParent()
                         }
+                        
+                        scoreLabel.isHidden = false
                     }
+                } else { // game is started - pause game
+                    pausedLabel.isHidden = false
+                    worldNode.isPaused = true
+                    gameIsPaused = true
                 }
             }
         }
