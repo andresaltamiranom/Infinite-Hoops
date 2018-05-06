@@ -12,8 +12,19 @@ import GameplayKit
 class GameScene: SKScene {
     var viewController : UIViewController!
     
+    let worldNode = SKNode()
+    
+    // Sprites
+    let ball = SKSpriteNode(imageNamed: "ball")
+    
+    // Labels
+    let tapToPauseAndRecalibrateLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
+    let tapAnywhereToPlayLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
+    
     override func didMove(to view: SKView) {
-        
+        addChild(worldNode)
+        self.backgroundColor = SKColor.orange
+        createLabels()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
