@@ -48,6 +48,14 @@ extension GameScene {
         addChild(tapToPauseAndRecalibrateLabel)
     }
     
+    func createCourt() {
+        court.size = CGSize(width: size.width * 0.1, height: size.height * 0.1)
+        originalCourtSize = court.size
+        court.position = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
+        court.zPosition = 1
+        worldNode.addChild(court)
+    }
+    
     func createBall() {
         ball.size = CGSize(width: size.height * 0.15, height: size.height * 0.15) // same dimensions to keep ball round
         ball.position = CGPoint(x: size.width * 0.5, y: size.height * 0.2)

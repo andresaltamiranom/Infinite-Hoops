@@ -16,6 +16,7 @@ class GameScene: SKScene {
     
     // Sprites
     let ball = SKSpriteNode(imageNamed: "ball")
+    let court = SKSpriteNode(imageNamed: "court")
     
     // Labels
     let tapToPauseAndRecalibrateLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
@@ -26,12 +27,14 @@ class GameScene: SKScene {
     // Constant values
     let ballSpeed: Double = 25.0
     
-    
     // Game Variables
     var canPlay = true
     var gameStarted = false
     var gameIsPaused = false
+    var goalChance = true
     var score: Int = 0
+    var originalCourtSize = CGSize(width: 0, height: 0)
+    var currentArchIncreaseRate: CGFloat = 1.02
     
     var menuElements: [SKNode] = []
     
@@ -42,6 +45,7 @@ class GameScene: SKScene {
         addChild(worldNode)
         self.backgroundColor = UIColor.init(hex: 0x2195d1)
         createLabels()
+        createCourt()
         createBall()
         
         if motionManager.isDeviceMotionAvailable {
@@ -100,6 +104,20 @@ class GameScene: SKScene {
         guard !worldNode.isPaused else { return }
         
         if gameStarted {
+            growCourt()
+            
+            if ballIsAtGoal() {
+                // Check if player scored hoop
+                if goalChance {
+                    
+                } else {
+                    
+                }
+                
+                court.size = originalCourtSize
+                goalChance = true
+            }
+            
             updateBallMovement()
         }
     }
@@ -134,6 +152,14 @@ class GameScene: SKScene {
         if ballWillGoOut.inY { ballMovement.dy = 0 }
         
         ball.run(SKAction.move(by: ballMovement, duration: 0.05))
+    }
+    
+    func growCourt() {
+        court.size = CGSize(width: court.size.width * currentArchIncreaseRate , height: court.size.height * currentArchIncreaseRate)
+    }
+    
+    func ballIsAtGoal() -> Bool {
+        return court.topPoint > self.frame.maxY || court.bottomPoint < self.frame.minY
     }
     
     func calibrate() {
