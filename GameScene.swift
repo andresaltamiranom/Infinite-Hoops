@@ -65,12 +65,19 @@ class GameScene: SKScene {
                 }
             } else {
                 if !gameStarted {
-                    // start the game
-                    gameStarted = true
-                    calibrate()
-                    
-                    for element in menuElements {
-                        element.removeFromParent()
+                    if !canPlay {
+                        let alertView = UIAlertController(title: "Unable to play", message: "Device motion not available.", preferredStyle: .alert)
+                        let action = UIAlertAction(title: "OK", style: .default, handler: { (alert) in })
+                        alertView.addAction(action)
+                        self.viewController.present(alertView, animated: true, completion: nil)
+                    } else {
+                        // start the game
+                        gameStarted = true
+                        calibrate()
+                        
+                        for element in menuElements {
+                            element.removeFromParent()
+                        }
                     }
                 }
             }
