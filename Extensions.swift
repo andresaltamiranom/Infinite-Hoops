@@ -44,4 +44,12 @@ extension GameScene {
         return (firstBody.categoryBitMask == body1 && secondBody.categoryBitMask == body2) ||
             (firstBody.categoryBitMask == body2 && secondBody.categoryBitMask == body1)
     }
+    
+    fileprivate func random() -> CGFloat{
+        return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
+    }
+    
+    func random(min : CGFloat, max : CGFloat) -> CGFloat{
+        return random() * (max - min) + min
+    }
 }
