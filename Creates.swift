@@ -87,7 +87,8 @@ extension GameScene {
         hoops.removeAll()
         for _ in 1...5 {
             let newHoop = SKSpriteNode(imageNamed: "hoop")
-            newHoop.size = CGSize(width: size.height * 0.25, height: size.height * 0.25)
+            let diameter = size.height * random(min: 0.25, max: 0.35)
+            newHoop.size = CGSize(width: diameter, height: diameter)
             
             var hoopsIntersect = false
             repeat {
