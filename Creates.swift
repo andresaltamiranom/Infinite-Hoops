@@ -80,6 +80,33 @@ extension GameScene {
         worldNode.addChild(court)
     }
     
+    func createHoops() {
+        for hoop in hoops {
+            hoop.removeFromParent()
+        }
+        hoops.removeAll()
+        for _ in 1...5 {
+            let newHoop = SKSpriteNode(imageNamed: "hoop")
+            newHoop.size = CGSize(width: size.height * 0.25, height: size.height * 0.25)
+            
+            var hoopsIntersect = false
+            repeat {
+                hoopsIntersect = false
+                newHoop.position = CGPoint(x: random(min: self.frame.minX + newHoop.width * 0.5, max: self.frame.maxX - newHoop.width * 0.5), y: random(min: self.frame.minY + newHoop.height * 0.5, max: self.frame.maxY - newHoop.height * 0.5))
+                for hoop in hoops {
+                    if circleIntersectsCircle(newHoop, hoop) {
+                        hoopsIntersect = true
+                        break
+                    }
+                }
+            } while hoopsIntersect
+            
+            newHoop.zPosition = 2
+            hoops.append(newHoop)
+            worldNode.addChild(newHoop)
+        }
+    }
+    
     func createBall() {
         ball.size = CGSize(width: size.height * 0.15, height: size.height * 0.15) // same dimensions to keep ball round
         ball.position = CGPoint(x: size.width * 0.5, y: size.height * 0.2)

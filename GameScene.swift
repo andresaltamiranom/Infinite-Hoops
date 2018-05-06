@@ -44,6 +44,7 @@ class GameScene: SKScene {
     var currentCourtIncreaseRate: CGFloat = 1.02
     
     var menuElements: [SKNode] = []
+    var hoops: [SKSpriteNode] = []
     
     var motionManager = CMMotionManager()
     var referenceAttitude: CMAttitude?
@@ -100,6 +101,8 @@ class GameScene: SKScene {
                                 element.removeFromParent()
                             }
                             
+                            createHoops()
+                            
                             scoreLabel.isHidden = false
                         }
                     }
@@ -122,7 +125,7 @@ class GameScene: SKScene {
         
         if gameStarted {
             growCourt()
-            
+            growHoops()
             if ballIsAtGoal() {
                 // Check if player scored hoop
                 if goalChance {
@@ -131,6 +134,7 @@ class GameScene: SKScene {
                     
                 }
                 
+                createHoops()
                 court.size = originalCourtSize
                 goalChance = true
             }
@@ -169,6 +173,10 @@ class GameScene: SKScene {
         if ballWillGoOut.inY { ballMovement.dy = 0 }
         
         ball.run(SKAction.move(by: ballMovement, duration: 0.05))
+    }
+    
+    func growHoops() {
+        
     }
     
     func growCourt() {
