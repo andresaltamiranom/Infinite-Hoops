@@ -45,6 +45,19 @@ extension GameScene {
             (firstBody.categoryBitMask == body2 && secondBody.categoryBitMask == body1)
     }
     
+    // Checks whether a circle intersects with another circle
+    func circleIntersectsCircle(_ circle1: SKSpriteNode, _ circle2: SKSpriteNode) -> Bool {
+        let x0 = circle1.position.x
+        let y0 = circle1.position.y
+        let r0 = circle1.height * 0.5
+        let x1 = circle2.position.x
+        let y1 = circle2.position.y
+        let r1 = circle2.height * 0.5
+        let midCalc = pow(x0 - x1, 2) + pow(y0 - y1, 2)
+        
+        return pow(r0 - r1, 2) <= midCalc && midCalc <= pow(r0 + r1, 2)
+    }
+    
     fileprivate func random() -> CGFloat{
         return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
     }
