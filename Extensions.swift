@@ -36,3 +36,12 @@ extension SKShapeNode {
     var width:  CGFloat { return self.frame.width }
     var height: CGFloat { return self.frame.height }
 }
+
+extension GameScene {
+    func collided(body1: UInt32, body2: UInt32, contact: SKPhysicsContact) -> Bool {
+        let firstBody = contact.bodyA
+        let secondBody = contact.bodyB
+        return (firstBody.categoryBitMask == body1 && secondBody.categoryBitMask == body2) ||
+            (firstBody.categoryBitMask == body2 && secondBody.categoryBitMask == body1)
+    }
+}
