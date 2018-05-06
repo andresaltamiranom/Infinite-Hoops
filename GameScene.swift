@@ -12,13 +12,7 @@ import CoreMotion
 
 class GameScene: SKScene {
     var viewController : UIViewController!
-    
     let worldNode = SKNode()
-    
-    var canPlay = true
-    var gameStarted = false
-    
-    var menuElements: [SKNode] = []
     
     // Sprites
     let ball = SKSpriteNode(imageNamed: "ball")
@@ -26,9 +20,18 @@ class GameScene: SKScene {
     // Labels
     let tapToPauseAndRecalibrateLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     let tapAnywhereToPlayLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
+    let pausedLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     
     // Constant values
     let ballSpeed: Double = 25.0
+    
+    
+    // Game Variables
+    var canPlay = true
+    var gameStarted = false
+    var gameIsPaused = false
+    
+    var menuElements: [SKNode] = []
     
     var motionManager = CMMotionManager()
     var referenceAttitude: CMAttitude?
@@ -51,19 +54,36 @@ class GameScene: SKScene {
         for touch in touches {
             let location = touch.location(in: self)
             
-            if !gameStarted {
-                // start the game
-                gameStarted = true
-                calibrate()
-                
-                for element in menuElements {
-                    element.removeFromParent()
+            if worldNode.isPaused {
+                if gameStarted { // unpausing started game
+                    pausedLabel.isHidden = true
+                    calibrate()
+                    worldNode.isPaused = false
+                    gameIsPaused = false
+                } else { // game started but player has lost
+                    // end game and go to result screen
+                }
+            } else {
+                if !gameStarted {
+                    // start the game
+                    gameStarted = true
+                    calibrate()
+                    
+                    for element in menuElements {
+                        element.removeFromParent()
+                    }
                 }
             }
         }
     }
     
     override func update(_ currentTime: TimeInterval) {
+        if gameIsPaused && !worldNode.isPaused {
+            worldNode.isPaused = true
+        }
+        
+        guard !worldNode.isPaused else { return }
+        
         if gameStarted {
             updateBallMovement()
         }

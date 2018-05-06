@@ -11,6 +11,16 @@ import SpriteKit
 
 extension GameScene {
     func createLabels() {
+        pausedLabel.text = "Paused"
+        pausedLabel.fontColor = SKColor.black
+        pausedLabel.horizontalAlignmentMode = .left
+        pausedLabel.fontSize = scoreLabel.fontSize
+        pausedLabel.position = CGPoint(x: size.width * 0.015, y: scoreLabel.position.y)
+        pausedLabel.zPosition = 10
+        pausedLabel.isHidden = true
+        menuElements.append(pausedLabel)
+        addChild(pausedLabel)
+        
         tapAnywhereToPlayLabel.text = "Tap screen to play!"
         tapAnywhereToPlayLabel.fontColor = SKColor.black
         tapAnywhereToPlayLabel.horizontalAlignmentMode = .center
