@@ -17,6 +17,12 @@ class GameScene: SKScene {
     // Sprites
     let ball = SKSpriteNode(imageNamed: "ball")
     let court = SKSpriteNode(imageNamed: "court")
+    let sound = SKSpriteNode(imageNamed: "sound")
+    
+    // Sounds
+    let bgm = SKAudioNode(fileNamed: "Updown.mp3")
+    let scoreSound = SKAudioNode(fileNamed: "goal.wav")
+    let loseSound = SKAudioNode(fileNamed: "lose.wav")
     
     // Labels
     let tapToPauseAndRecalibrateLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
@@ -32,9 +38,10 @@ class GameScene: SKScene {
     var gameStarted = false
     var gameIsPaused = false
     var goalChance = true
+    var soundIsOn = true
     var score: Int = 0
     var originalCourtSize = CGSize(width: 0, height: 0)
-    var currentArchIncreaseRate: CGFloat = 1.02
+    var currentCourtIncreaseRate: CGFloat = 1.02
     
     var menuElements: [SKNode] = []
     
@@ -47,6 +54,7 @@ class GameScene: SKScene {
         createLabels()
         createCourt()
         createBall()
+        createSoundStuff()
         
         if motionManager.isDeviceMotionAvailable {
             motionManager.startDeviceMotionUpdates()
@@ -66,31 +74,40 @@ class GameScene: SKScene {
                     calibrate()
                     worldNode.isPaused = false
                     gameIsPaused = false
+                    bgm.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 0.0))
                 } else { // game started but player has lost
                     // end game and go to result screen
                 }
             } else {
                 if !gameStarted {
-                    if !canPlay {
-                        let alertView = UIAlertController(title: "Unable to play", message: "Device motion not available.", preferredStyle: .alert)
-                        let action = UIAlertAction(title: "OK", style: .default, handler: { (alert) in })
-                        alertView.addAction(action)
-                        self.viewController.present(alertView, animated: true, completion: nil)
+                    if sound.contains(location) {
+                        soundIsOn = !soundIsOn
+                        sound.texture = soundIsOn ? SKTexture(imageNamed: "sound") : SKTexture(imageNamed: "mute")
+                        UserDefaults.standard.set(soundIsOn, forKey: "sound")
+                        bgm.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 1.0))
                     } else {
-                        // start the game
-                        gameStarted = true
-                        calibrate()
-                        
-                        for element in menuElements {
-                            element.removeFromParent()
+                        if !canPlay {
+                            let alertView = UIAlertController(title: "Unable to play", message: "Device motion not available.", preferredStyle: .alert)
+                            let action = UIAlertAction(title: "OK", style: .default, handler: { (alert) in })
+                            alertView.addAction(action)
+                            self.viewController.present(alertView, animated: true, completion: nil)
+                        } else {
+                            // start the game
+                            gameStarted = true
+                            calibrate()
+                            
+                            for element in menuElements {
+                                element.removeFromParent()
+                            }
+                            
+                            scoreLabel.isHidden = false
                         }
-                        
-                        scoreLabel.isHidden = false
                     }
                 } else { // game is started - pause game
                     pausedLabel.isHidden = false
                     worldNode.isPaused = true
                     gameIsPaused = true
+                    bgm.run(SKAction.changeVolume(to: 0.0, duration: 0.0))
                 }
             }
         }
@@ -155,7 +172,7 @@ class GameScene: SKScene {
     }
     
     func growCourt() {
-        court.size = CGSize(width: court.size.width * currentArchIncreaseRate , height: court.size.height * currentArchIncreaseRate)
+        court.size = CGSize(width: court.size.width * currentCourtIncreaseRate , height: court.size.height * currentCourtIncreaseRate)
     }
     
     func ballIsAtGoal() -> Bool {

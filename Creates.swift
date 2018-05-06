@@ -48,6 +48,30 @@ extension GameScene {
         addChild(tapToPauseAndRecalibrateLabel)
     }
     
+    func createSoundStuff() {
+        soundIsOn = UserDefaults.standard.bool(forKey: "sound")
+        
+        sound.size = CGSize(width: size.width * 0.065, height: size.width * 0.065)
+        sound.position = CGPoint(x: size.width * 0.05, y: size.height * 0.9 + sound.height * 0.2)
+        sound.texture = soundIsOn ? SKTexture(imageNamed: "sound") : SKTexture(imageNamed: "mute")
+        
+        bgm.name = "bgm"
+        bgm.run(SKAction.changeVolume(to: 0.8, duration: 0.0))
+        scoreSound.run(SKAction.changeVolume(to: 1.0, duration: 0.0))
+        loseSound.run(SKAction.changeVolume(to: 1.0, duration: 0.0))
+        
+        bgm.autoplayLooped = true
+        scoreSound.autoplayLooped = false
+        loseSound.autoplayLooped = false
+        
+        menuElements.append(sound)
+        
+        addChild(bgm)
+        addChild(sound)
+        addChild(scoreSound)
+        addChild(loseSound)
+    }
+    
     func createCourt() {
         court.size = CGSize(width: size.width * 0.1, height: size.height * 0.1)
         originalCourtSize = court.size
