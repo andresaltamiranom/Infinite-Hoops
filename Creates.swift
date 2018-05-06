@@ -56,9 +56,9 @@ extension GameScene {
         sound.texture = soundIsOn ? SKTexture(imageNamed: "sound") : SKTexture(imageNamed: "mute")
         
         bgm.name = "bgm"
-        bgm.run(SKAction.changeVolume(to: 0.8, duration: 0.0))
-        scoreSound.run(SKAction.changeVolume(to: 1.0, duration: 0.0))
-        loseSound.run(SKAction.changeVolume(to: 1.0, duration: 0.0))
+        bgm.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 0.0))
+        scoreSound.run(SKAction.changeVolume(to: soundIsOn ? 1.0 : 0.0, duration: 0.0))
+        loseSound.run(SKAction.changeVolume(to: soundIsOn ? 1.0 : 0.0, duration: 0.0))
         
         bgm.autoplayLooped = true
         scoreSound.autoplayLooped = false
