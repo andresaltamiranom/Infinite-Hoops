@@ -17,3 +17,22 @@ extension UIColor {
         self.init(red:red, green:green, blue:blue, alpha:alpha)
     }
 }
+
+extension SKSpriteNode {
+    var width:  CGFloat { return self.size.width }
+    var height: CGFloat { return self.size.height }
+    
+    var rightmostPoint: CGFloat { return self.position.x + self.width * 0.5 }
+    var leftmostPoint:  CGFloat { return self.position.x - self.width * 0.5 }
+    var topPoint:       CGFloat { return self.position.y + self.height * 0.5 }
+    var bottomPoint:    CGFloat { return self.position.y - self.height * 0.5 }
+    
+    override open func contains(_ point: CGPoint) -> Bool {
+        return self.frame.contains(point)
+    }
+}
+
+extension SKShapeNode {
+    var width:  CGFloat { return self.frame.width }
+    var height: CGFloat { return self.frame.height }
+}
