@@ -38,13 +38,6 @@ extension SKShapeNode {
 }
 
 extension GameScene {
-    func collided(body1: UInt32, body2: UInt32, contact: SKPhysicsContact) -> Bool {
-        let firstBody = contact.bodyA
-        let secondBody = contact.bodyB
-        return (firstBody.categoryBitMask == body1 && secondBody.categoryBitMask == body2) ||
-            (firstBody.categoryBitMask == body2 && secondBody.categoryBitMask == body1)
-    }
-    
     // Checks whether a circle intersects with another circle
     func circleIntersectsCircle(_ circle1: SKSpriteNode, _ circle2: SKSpriteNode) -> Bool {
         let x0 = circle1.position.x
