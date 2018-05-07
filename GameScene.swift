@@ -37,7 +37,6 @@ class GameScene: SKScene {
     var canPlay = true
     var gameStarted = false
     var gameIsPaused = false
-    var goalChance = true
     var soundIsOn = true
     var score: Int = 0
     var originalCourtSize = CGSize(width: 0, height: 0)
@@ -128,19 +127,38 @@ class GameScene: SKScene {
             growHoops()
             if ballIsAtGoal() {
                 // Check if player scored hoop
-                if goalChance {
+                if scoredBasket() {
+                    score = score + 1
+                    scoreLabel.text = "Score: \(score)"
                     
+                    if soundIsOn {
+                        scoreSound.run(SKAction.play())
+                    }
                 } else {
+                    self.backgroundColor = UIColor.init(hex: 0xf92020)
                     
+                    gameStarted = false
+                    if soundIsOn {
+                        loseSound.run(SKAction.play())
+                    }
+                    
+                    worldNode.isPaused = true
+                    return
                 }
                 
                 court.size = originalCourtSize
                 createHoops()
-                goalChance = true
             }
             
             updateBallMovement()
         }
+    }
+    
+    func scoredBasket() -> Bool {
+        for hoop in hoops {
+            if circleContainsCircle(hoop.sprite, ball) { return true }
+        }
+        return false
     }
     
     func makeSureBallDoesntGoOutOfBounds(with moveToMake: CGVector) -> (Bool, Bool) {
