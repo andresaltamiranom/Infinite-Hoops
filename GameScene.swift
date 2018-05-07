@@ -44,7 +44,7 @@ class GameScene: SKScene {
     var currentCourtIncreaseRate: CGFloat = 1.02
     
     var menuElements: [SKNode] = []
-    var hoops: [SKSpriteNode] = []
+    var hoops: [(sprite: SKSpriteNode, attributes: (scale: CGFloat, positionRatio: (x: CGFloat, y: CGFloat)))] = []
     
     var motionManager = CMMotionManager()
     var referenceAttitude: CMAttitude?
@@ -134,8 +134,8 @@ class GameScene: SKScene {
                     
                 }
                 
-                createHoops()
                 court.size = originalCourtSize
+                createHoops()
                 goalChance = true
             }
             
@@ -176,7 +176,10 @@ class GameScene: SKScene {
     }
     
     func growHoops() {
-        
+        for hoop in hoops {
+            hoop.sprite.size = CGSize(width: court.height * hoop.attributes.scale, height: court.height * hoop.attributes.scale)
+            hoop.sprite.position = CGPoint(x: court.leftmostPoint + court.width * hoop.attributes.positionRatio.x, y: court.bottomPoint + court.height * hoop.attributes.positionRatio.y)
+        }
     }
     
     func growCourt() {

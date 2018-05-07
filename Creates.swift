@@ -82,28 +82,30 @@ extension GameScene {
     
     func createHoops() {
         for hoop in hoops {
-            hoop.removeFromParent()
+            hoop.sprite.removeFromParent()
         }
         hoops.removeAll()
         for _ in 1...5 {
             let newHoop = SKSpriteNode(imageNamed: "hoop")
-            let diameter = size.height * random(min: 0.25, max: 0.35)
-            newHoop.size = CGSize(width: diameter, height: diameter)
+            let hoopScale = random(min: 0.25, max: 0.35)
+            newHoop.size = CGSize(width: court.height * hoopScale, height: court.height * hoopScale)
             
             var hoopsIntersect = false
             repeat {
                 hoopsIntersect = false
-                newHoop.position = CGPoint(x: random(min: self.frame.minX + newHoop.width * 0.5, max: self.frame.maxX - newHoop.width * 0.5), y: random(min: self.frame.minY + newHoop.height * 0.5, max: self.frame.maxY - newHoop.height * 0.5))
+                newHoop.position = CGPoint(x: random(min: court.leftmostPoint + newHoop.width * 0.5, max: court.rightmostPoint - newHoop.width * 0.5), y: random(min: court.bottomPoint + newHoop.height * 0.5, max: court.topPoint - newHoop.height * 0.5))
                 for hoop in hoops {
-                    if circleIntersectsCircle(newHoop, hoop) {
+                    if circleIntersectsCircle(newHoop, hoop.sprite) || circleContainsCircle(newHoop, hoop.sprite) {
                         hoopsIntersect = true
                         break
                     }
                 }
             } while hoopsIntersect
             
+            let hoopPositionRatio = ((newHoop.position.x - court.leftmostPoint) / court.width, (newHoop.position.y - court.bottomPoint) / court.height)
+            
             newHoop.zPosition = 2
-            hoops.append(newHoop)
+            hoops.append((newHoop, (hoopScale, hoopPositionRatio)))
             worldNode.addChild(newHoop)
         }
     }
