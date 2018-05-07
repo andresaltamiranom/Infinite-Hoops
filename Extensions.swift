@@ -58,6 +58,16 @@ extension GameScene {
         return pow(r0 - r1, 2) <= midCalc && midCalc <= pow(r0 + r1, 2)
     }
     
+    func circleContainsCircle(_ circle1: SKSpriteNode, _ circle2: SKSpriteNode) -> Bool {
+        let circle1In2 = eulerDistance(circle2.position, circle1.position) + circle1.width * 0.5 + circle2.width * 0.5 <= 2 * circle2.width * 0.5
+        let circle2In1 = eulerDistance(circle1.position, circle2.position) + circle2.width * 0.5 + circle1.width * 0.5 <= 2 * circle1.width * 0.5
+        return circle1In2 || circle2In1
+    }
+    
+    func eulerDistance(_ p1: CGPoint, _ p2: CGPoint) -> CGFloat {
+        return sqrt(pow(p1.x-p2.x, 2) + pow(p1.y-p2.y, 2))
+    }
+    
     fileprivate func random() -> CGFloat{
         return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
     }
