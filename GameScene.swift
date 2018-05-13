@@ -25,18 +25,22 @@ class GameScene: SKScene {
     let loseSound = SKAudioNode(fileNamed: "lose.wav")
     
     // Labels
-    let tapToPauseAndRecalibrateLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
-    let tapAnywhereToPlayLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     let pausedLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     let scoreLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
+    let goBackLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
+    let tapAnywhereToPlayLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
+    let finalScoreMessageLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
+    let tapToPauseAndRecalibrateLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     
     // Constant values
     let ballSpeed: Double = 25.0
+    let bgColor = UIColor.init(hex: 0x2195d1)
     
     // Game Variables
     var canPlay = true
     var gameStarted = false
     var gameIsPaused = false
+    var finishedGame = false
     var soundIsOn = true
     var score: Int = 0
     var originalCourtSize = CGSize(width: 0, height: 0)
@@ -50,7 +54,7 @@ class GameScene: SKScene {
     
     override func didMove(to view: SKView) {
         addChild(worldNode)
-        self.backgroundColor = UIColor.init(hex: 0x2195d1)
+        self.backgroundColor = bgColor
         createLabels()
         createCourt()
         createBall()
@@ -68,7 +72,9 @@ class GameScene: SKScene {
         for touch in touches {
             let location = touch.location(in: self)
             
-            if worldNode.isPaused {
+            if finishedGame {
+                exitGame() // goes back to main menu screen
+            } else if worldNode.isPaused {
                 if gameStarted { // unpausing started game
                     pausedLabel.isHidden = true
                     calibrate()
@@ -76,7 +82,7 @@ class GameScene: SKScene {
                     gameIsPaused = false
                     bgm.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 0.0))
                 } else { // game started but player has lost
-                    // end game and go to result screen
+                    endGame() // goes to results screen
                 }
             } else {
                 if !gameStarted {
@@ -219,5 +225,37 @@ class GameScene: SKScene {
         attitude!.multiply(byInverseOf: referenceAttitude!)
         
         return CGVector(dx: attitude!.pitch * ballSpeed, dy: attitude!.roll  * ballSpeed)
+    }
+    
+    func endGame() {
+        self.backgroundColor = bgColor
+        
+        finishedGame = true
+        
+        worldNode.removeAllActions()
+        worldNode.removeAllChildren()
+        scoreLabel.removeFromParent()
+        pausedLabel.removeFromParent()
+        
+        if score == 0 {
+            finalScoreMessageLabel.text = "You scored 0 baskets :("
+        } else if score == 1 {
+            finalScoreMessageLabel.text = "You scored 1 basket :|"
+        } else {
+            finalScoreMessageLabel.text = "You scored \(score) baskets! :)"
+        }
+        
+        addChild(finalScoreMessageLabel)
+        addChild(goBackLabel)
+    }
+    
+    func exitGame() {
+        self.removeAllActions()
+        self.removeAllChildren()
+        
+        let newScene = GameScene(size: self.size)
+        newScene.scaleMode = self.scaleMode
+        self.view?.presentScene(newScene, transition: SKTransition.fade(withDuration: 1.0))
+        newScene.viewController = self.viewController
     }
 }

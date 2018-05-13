@@ -46,6 +46,17 @@ extension GameScene {
         tapToPauseAndRecalibrateLabel.isHidden = false
         menuElements.append(tapToPauseAndRecalibrateLabel)
         addChild(tapToPauseAndRecalibrateLabel)
+        
+        finalScoreMessageLabel.fontColor = SKColor.black
+        finalScoreMessageLabel.horizontalAlignmentMode = .center
+        finalScoreMessageLabel.fontSize = size.width / 25
+        finalScoreMessageLabel.position = CGPoint(x: size.width * 0.5, y: size.height * 0.2)
+        
+        goBackLabel.text = "Tap screen to go back"
+        goBackLabel.fontColor = SKColor.black
+        goBackLabel.horizontalAlignmentMode = .center
+        goBackLabel.fontSize = size.width / 37.5
+        goBackLabel.position = CGPoint(x: size.width * 0.5, y: size.height * 0.1)
     }
     
     func createSoundStuff() {
