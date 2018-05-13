@@ -38,6 +38,15 @@ extension SKShapeNode {
 }
 
 extension GameScene {
+    func checkForHighscore() -> Bool {
+        let highscore = UserDefaults.standard.integer(forKey: "highscore")
+        if score > highscore {
+            UserDefaults.standard.set(score, forKey: "highscore")
+            return true
+        }
+        return false
+    }
+    
     // Checks whether a circle intersects with another circle
     func circleIntersectsCircle(_ circle1: SKSpriteNode, _ circle2: SKSpriteNode) -> Bool {
         let x0 = circle1.position.x

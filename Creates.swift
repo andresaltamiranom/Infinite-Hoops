@@ -29,6 +29,16 @@ extension GameScene {
         pausedLabel.isHidden = true
         addChild(pausedLabel)
         
+        let highscore = UserDefaults.standard.integer(forKey: "highscore")
+        highscoreLabel.text = "Highscore: \(highscore)"
+        highscoreLabel.fontColor = SKColor.black
+        highscoreLabel.horizontalAlignmentMode = .right
+        highscoreLabel.fontSize = size.width / 25
+        highscoreLabel.position = CGPoint(x: size.width * 0.985, y: size.height * 0.9)
+        highscoreLabel.isHidden = false
+        menuElements.append(highscoreLabel)
+        addChild(highscoreLabel)
+        
         tapAnywhereToPlayLabel.text = "Tap screen to play!"
         tapAnywhereToPlayLabel.fontColor = SKColor.black
         tapAnywhereToPlayLabel.horizontalAlignmentMode = .center

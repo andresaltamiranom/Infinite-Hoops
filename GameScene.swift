@@ -28,6 +28,7 @@ class GameScene: SKScene {
     let pausedLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     let scoreLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     let goBackLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
+    let highscoreLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     let tapAnywhereToPlayLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     let finalScoreMessageLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
     let tapToPauseAndRecalibrateLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
@@ -237,8 +238,16 @@ class GameScene: SKScene {
         scoreLabel.removeFromParent()
         pausedLabel.removeFromParent()
         
+        let beatHighscore = checkForHighscore()
+        
         if score == 0 {
             finalScoreMessageLabel.text = "You scored 0 baskets :("
+        } else if beatHighscore {
+            if score == 1 {
+                finalScoreMessageLabel.text = "New highscore! You scored 1 basket! :D"
+            } else {
+                finalScoreMessageLabel.text = "New highscore! You scored \(score) baskets! :D"
+            }
         } else if score == 1 {
             finalScoreMessageLabel.text = "You scored 1 basket :|"
         } else {
