@@ -18,6 +18,7 @@ class GameScene: SKScene {
     let ball = SKSpriteNode(imageNamed: "ball")
     let court = SKSpriteNode(imageNamed: "court")
     let sound = SKSpriteNode(imageNamed: "sound")
+    let shareButton = SKSpriteNode(imageNamed: "share_button")
     
     // Sounds
     let bgm = SKAudioNode(fileNamed: "Updown.mp3")
@@ -60,6 +61,7 @@ class GameScene: SKScene {
         createCourt()
         createBall()
         createSoundStuff()
+        createMenuShareButton()
         
         if motionManager.isDeviceMotionAvailable {
             motionManager.startDeviceMotionUpdates()
@@ -74,7 +76,22 @@ class GameScene: SKScene {
             let location = touch.location(in: self)
             
             if finishedGame {
-                exitGame() // goes back to main menu screen
+                if shareButton.contains(location) {
+                    let textToShare = "I just scored \(score) \(score == 1 ? "basket" : "baskets") on Infinite Hoops! Try to beat me, it's free! #InfiniteHoops"
+                    
+                    let objectsToShare = [textToShare]
+                    let activityVC = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
+                    activityVC.excludedActivityTypes = [UIActivityType.airDrop, UIActivityType.addToReadingList]
+                    
+                    if let popOver = activityVC.popoverPresentationController {
+                        popOver.sourceView = self.viewController.view
+                        popOver.sourceRect = self.viewController.view.bounds
+                    }
+                    
+                    self.viewController.present(activityVC, animated: true, completion: nil)
+                } else {
+                    exitGame() // goes back to main menu screen
+                }
             } else if worldNode.isPaused {
                 if gameStarted { // unpausing started game
                     pausedLabel.isHidden = true
@@ -92,6 +109,20 @@ class GameScene: SKScene {
                         sound.texture = soundIsOn ? SKTexture(imageNamed: "sound") : SKTexture(imageNamed: "mute")
                         UserDefaults.standard.set(soundIsOn, forKey: "sound")
                         bgm.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 1.0))
+                    } else if shareButton.contains(location) {
+                        let hs = UserDefaults.standard.integer(forKey: "highscore")
+                        let textToShare = "Can you beat my highscore of \(hs) \(hs == 1 ? "basket" : "baskets") on Infinite Hoops? Come try, it's free! #InfiniteHoops"
+                        
+                        let objectsToShare = [textToShare]
+                        let activityVC = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
+                        activityVC.excludedActivityTypes = [UIActivityType.airDrop, UIActivityType.addToReadingList]
+                        
+                        if let popOver = activityVC.popoverPresentationController {
+                            popOver.sourceView = self.viewController.view
+                            popOver.sourceRect = self.viewController.view.bounds
+                        }
+                        
+                        self.viewController.present(activityVC, animated: true, completion: nil)
                     } else {
                         if !canPlay {
                             let alertView = UIAlertController(title: "Unable to play", message: "Device motion not available.", preferredStyle: .alert)
@@ -256,6 +287,8 @@ class GameScene: SKScene {
         
         addChild(finalScoreMessageLabel)
         addChild(goBackLabel)
+        
+        createShareButton()
     }
     
     func exitGame() {

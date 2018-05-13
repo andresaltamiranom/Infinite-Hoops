@@ -69,6 +69,27 @@ extension GameScene {
         goBackLabel.position = CGPoint(x: size.width * 0.5, y: size.height * 0.1)
     }
     
+    func createMenuShareButton() {
+        shareButton.size = sound.size
+        shareButton.position = CGPoint(x: sound.position.x, y: sound.position.y - shareButton.height - size.height * 0.05)
+        menuElements.append(shareButton)
+        addChild(shareButton)
+    }
+    
+    func createShareButton() {
+        shareButton.size = CGSize(width: size.width * 0.1, height: size.width * 0.1)
+        shareButton.position = CGPoint(x: size.width * 0.985 - shareButton.width * 0.5, y: size.height * 0.985 - shareButton.height * 0.5)
+        addChild(shareButton)
+        
+        let shareButtonText = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
+        shareButtonText.text = "SHARE"
+        shareButtonText.fontColor = SKColor.black
+        shareButtonText.horizontalAlignmentMode = .center
+        shareButtonText.fontSize = size.width / 37.5
+        shareButtonText.position = CGPoint(x: shareButton.position.x, y: shareButton.position.y - shareButton.height * 0.5 - shareButtonText.frame.height)
+        addChild(shareButtonText)
+    }
+    
     func createSoundStuff() {
         soundIsOn = UserDefaults.standard.bool(forKey: "sound")
         
