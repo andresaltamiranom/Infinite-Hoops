@@ -133,7 +133,7 @@ extension GameScene {
             hoop.sprite.removeFromParent()
         }
         hoops.removeAll()
-        for _ in 1...5 {
+        for _ in 1...hoopsLeft {
             let newHoop = SKSpriteNode(imageNamed: "hoop")
             let hoopScale = random(min: 0.23, max: 0.32)
             newHoop.size = CGSize(width: court.height * hoopScale, height: court.height * hoopScale)

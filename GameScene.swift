@@ -31,6 +31,8 @@ class GameScene: SKScene {
     
     // Constant values
     let ballSpeed: Double = 25.0
+    let basketsInARowToRegainHoop: Int = 10
+    let maxHoops = 5
     
     // Game Variables
     var canPlay = true
@@ -39,12 +41,13 @@ class GameScene: SKScene {
     var finishedGame = false
     var soundIsOn = true
     var score: Int = 0
+    var hoopsLeft: Int = 0
+    var basketsScoredInARow: Int = 0
     var originalCourtSize = CGSize(width: 0, height: 0)
     
     var currentDifficultyStep = 0
     var currentCourtIncreaseRate: CGFloat = 0
     var difficultySteps: [Int] = [0, 5, 15, 30, 50, 75, 100, 150, 300]
-    var hoopsLeft: [Int] = [5, 5, 5, 5, 4, 4, 3, 2, 1]
     var courtIncreaseRates: [CGFloat] = [1.02, 1.02, 1.022, 1.023, 1.025, 1.026, 1.028, 1.029, 1.03] // 1.02 <= rate <= 1.03
     
     var menuElements: [SKNode] = []
@@ -70,6 +73,7 @@ class GameScene: SKScene {
         }
         
         currentCourtIncreaseRate = courtIncreaseRates[0]
+        hoopsLeft = maxHoops
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -171,6 +175,13 @@ class GameScene: SKScene {
                     score += 1
                     scoreLabel.text = "Score: \(score)"
                     
+                    basketsScoredInARow += 1
+                    
+                    if basketsScoredInARow == basketsInARowToRegainHoop {
+                        basketsScoredInARow = 0
+                        hoopsLeft = min(hoopsLeft + 1, maxHoops)
+                    }
+                    
                     if currentDifficultyStep < difficultySteps.count - 1 && score >= difficultySteps[currentDifficultyStep + 1] {
                         currentDifficultyStep += 1
                         currentCourtIncreaseRate = courtIncreaseRates[currentDifficultyStep]
@@ -180,15 +191,20 @@ class GameScene: SKScene {
                         scoreSound.run(SKAction.play())
                     }
                 } else {
-                    self.backgroundColor = UIColor.init(hex: 0xf92020)
+                    hoopsLeft -= 1
+                    basketsScoredInARow = 0
                     
-                    gameStarted = false
-                    if soundIsOn {
-                        loseSound.run(SKAction.play())
+                    if hoopsLeft == 0 {
+                        self.backgroundColor = UIColor.init(hex: 0xf92020)
+                        
+                        gameStarted = false
+                        if soundIsOn {
+                            loseSound.run(SKAction.play())
+                        }
+                        
+                        worldNode.isPaused = true
+                        return
                     }
-                    
-                    worldNode.isPaused = true
-                    return
                 }
                 
                 court.size = originalCourtSize
