@@ -17,22 +17,17 @@ class GameScene: SKScene {
     // Sprites
     let ball = SKSpriteNode(imageNamed: "ball")
     let court = SKSpriteNode(imageNamed: "court")
-    let sound = SKSpriteNode(imageNamed: "sound")
     let shareButton = SKSpriteNode(imageNamed: "share_button")
+    let sound = SKSpriteNode(imageNamed: "sound")
+    
+    // Labels
+    var pausedLabel = SKLabelNode()
+    var scoreLabel = SKLabelNode()
     
     // Sounds
     let bgm = SKAudioNode(fileNamed: "Updown.mp3")
-    let scoreSound = SKAudioNode(fileNamed: "goal.wav")
     let loseSound = SKAudioNode(fileNamed: "lose.wav")
-    
-    // Labels
-    let pausedLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
-    let scoreLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
-    let goBackLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
-    let highscoreLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
-    let tapAnywhereToPlayLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
-    let finalScoreMessageLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
-    let tapToPauseAndRecalibrateLabel = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
+    let scoreSound = SKAudioNode(fileNamed: "goal.wav")
     
     // Constant values
     let ballSpeed: Double = 25.0
@@ -271,6 +266,8 @@ class GameScene: SKScene {
         
         let beatHighscore = checkForHighscore()
         
+        let finalScoreMessageLabel = createLabel(text: "", fontSize: size.width / 25, xPos: size.width * 0.5, yPos: size.height * 0.2)
+        
         if score == 0 {
             finalScoreMessageLabel.text = "You scored 0 baskets :("
         } else if beatHighscore {
@@ -286,6 +283,8 @@ class GameScene: SKScene {
         }
         
         addChild(finalScoreMessageLabel)
+        
+        let goBackLabel = createLabel(text: "Tap screen to go back", fontSize: size.width / 37.5, xPos: size.width * 0.5, yPos: size.height * 0.1)
         addChild(goBackLabel)
         
         createShareButton()

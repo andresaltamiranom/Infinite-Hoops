@@ -47,6 +47,20 @@ extension GameScene {
         return false
     }
     
+    func createLabel(font: String = Config.defaultFont, text: String, fontColor: SKColor = Config.defaultFontColor, horizontalAlignment: SKLabelHorizontalAlignmentMode = .center, verticalAlignment: SKLabelVerticalAlignmentMode = .baseline, fontSize: CGFloat, xPos: CGFloat, yPos: CGFloat, isHidden: Bool = false, zPosition: CGFloat = 0) -> SKLabelNode {
+        let label = SKLabelNode(fontNamed: font)
+        label.text = text
+        label.fontColor = fontColor
+        label.horizontalAlignmentMode = horizontalAlignment
+        label.verticalAlignmentMode = verticalAlignment
+        label.fontSize = fontSize
+        label.position = CGPoint(x: xPos, y: yPos)
+        label.isHidden = isHidden
+        label.zPosition = zPosition
+        
+        return label
+    }
+    
     // Checks whether a circle intersects with another circle
     func circleIntersectsCircle(_ circle1: SKSpriteNode, _ circle2: SKSpriteNode) -> Bool {
         let x0 = circle1.position.x

@@ -11,62 +11,68 @@ import SpriteKit
 
 extension GameScene {
     func createLabels() {
-        scoreLabel.text = "Score: \(score)"
-        scoreLabel.fontColor = SKColor.black
-        scoreLabel.horizontalAlignmentMode = .right
-        scoreLabel.fontSize = size.width / 18.75
-        scoreLabel.position = CGPoint(x: size.width * 0.985, y: size.height * 0.9)
-        scoreLabel.zPosition = 10
-        scoreLabel.isHidden = true
-        addChild(scoreLabel)
+        let dunkTheBallLabel = createLabel(
+            text: "Dunk the ball inside any of the hoops to score.",
+            fontSize: size.width / 37.5,
+            xPos: size.width * 0.5,
+            yPos: size.height * 0.66)
         
-        pausedLabel.text = "Paused"
-        pausedLabel.fontColor = SKColor.black
-        pausedLabel.horizontalAlignmentMode = .left
-        pausedLabel.fontSize = scoreLabel.fontSize
-        pausedLabel.position = CGPoint(x: size.width * 0.015, y: scoreLabel.position.y)
-        pausedLabel.zPosition = 10
-        pausedLabel.isHidden = true
-        addChild(pausedLabel)
+        let highscoreLabel = createLabel(
+            text: "Highscore: \(UserDefaults.standard.integer(forKey: "highscore"))",
+            horizontalAlignment: .right,
+            fontSize: size.width / 25,
+            xPos: size.width * 0.985,
+            yPos: size.height * 0.9)
         
-        let highscore = UserDefaults.standard.integer(forKey: "highscore")
-        highscoreLabel.text = "Highscore: \(highscore)"
-        highscoreLabel.fontColor = SKColor.black
-        highscoreLabel.horizontalAlignmentMode = .right
-        highscoreLabel.fontSize = size.width / 25
-        highscoreLabel.position = CGPoint(x: size.width * 0.985, y: size.height * 0.9)
-        highscoreLabel.isHidden = false
-        menuElements.append(highscoreLabel)
+        let tapAnywhereToPlayLabel = createLabel(
+            text: "Tap to start playing!",
+            fontSize: size.width / 25,
+            xPos: size.width * 0.5,
+            yPos: size.height * 0.3)
+        
+        let tapToPauseAndRecalibrateLabel = createLabel(
+            text: "Once the game starts, tap to pause and recalibrate.",
+            fontSize: size.width / 37.5,
+            xPos: size.width * 0.5,
+            yPos: size.height * 0.73)
+        
+        let tiltToMoveLabel = createLabel(
+            text: "Tilt your device to move the ball.",
+            fontSize: size.width / 37.5,
+            xPos: size.width * 0.5,
+            yPos: size.height * 0.8)
+        
+        pausedLabel = createLabel(
+            text: "Paused",
+            horizontalAlignment: .left,
+            fontSize: size.width / 18.75,
+            xPos: size.width * 0.015,
+            yPos: size.height * 0.9,
+            isHidden: true,
+            zPosition: 10)
+        
+        scoreLabel = createLabel(
+            text: "Score: \(score)",
+            horizontalAlignment: .right,
+            fontSize: size.width / 18.75,
+            xPos: size.width * 0.985,
+            yPos: size.height * 0.9,
+            isHidden: true,
+            zPosition: 10)
+        
+        menuElements += [dunkTheBallLabel,
+                         highscoreLabel,
+                         tapAnywhereToPlayLabel,
+                         tapToPauseAndRecalibrateLabel,
+                         tiltToMoveLabel]
+        
+        addChild(dunkTheBallLabel)
         addChild(highscoreLabel)
-        
-        tapAnywhereToPlayLabel.text = "Tap screen to play!"
-        tapAnywhereToPlayLabel.fontColor = SKColor.black
-        tapAnywhereToPlayLabel.horizontalAlignmentMode = .center
-        tapAnywhereToPlayLabel.fontSize = size.width / 25
-        tapAnywhereToPlayLabel.position = CGPoint(x: size.width * 0.5, y: size.height * 0.3)
-        tapAnywhereToPlayLabel.isHidden = false
-        menuElements.append(tapAnywhereToPlayLabel)
         addChild(tapAnywhereToPlayLabel)
-        
-        tapToPauseAndRecalibrateLabel.text = "Once the game starts, tap to pause and recalibrate"
-        tapToPauseAndRecalibrateLabel.fontColor = SKColor.black
-        tapToPauseAndRecalibrateLabel.horizontalAlignmentMode = .center
-        tapToPauseAndRecalibrateLabel.fontSize = size.width / 37.5
-        tapToPauseAndRecalibrateLabel.position = CGPoint(x: size.width * 0.5, y: size.height * 0.6)
-        tapToPauseAndRecalibrateLabel.isHidden = false
-        menuElements.append(tapToPauseAndRecalibrateLabel)
         addChild(tapToPauseAndRecalibrateLabel)
-        
-        finalScoreMessageLabel.fontColor = SKColor.black
-        finalScoreMessageLabel.horizontalAlignmentMode = .center
-        finalScoreMessageLabel.fontSize = size.width / 25
-        finalScoreMessageLabel.position = CGPoint(x: size.width * 0.5, y: size.height * 0.2)
-        
-        goBackLabel.text = "Tap screen to go back"
-        goBackLabel.fontColor = SKColor.black
-        goBackLabel.horizontalAlignmentMode = .center
-        goBackLabel.fontSize = size.width / 37.5
-        goBackLabel.position = CGPoint(x: size.width * 0.5, y: size.height * 0.1)
+        addChild(tiltToMoveLabel)
+        addChild(pausedLabel)
+        addChild(scoreLabel)
     }
     
     func createMenuShareButton() {
