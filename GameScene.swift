@@ -31,7 +31,6 @@ class GameScene: SKScene {
     
     // Constant values
     let ballSpeed: Double = 25.0
-    let bgColor = UIColor.init(hex: 0x2195d1)
     
     // Game Variables
     var canPlay = true
@@ -41,7 +40,12 @@ class GameScene: SKScene {
     var soundIsOn = true
     var score: Int = 0
     var originalCourtSize = CGSize(width: 0, height: 0)
-    var currentCourtIncreaseRate: CGFloat = 1.02
+    
+    var currentDifficultyStep = 0
+    var currentCourtIncreaseRate: CGFloat = 0
+    var difficultySteps: [Int] = [0, 5, 15, 30, 50, 75, 100, 150, 300]
+    var hoopsLeft: [Int] = [5, 5, 5, 5, 4, 4, 3, 2, 1]
+    var courtIncreaseRates: [CGFloat] = [1.02, 1.02, 1.022, 1.023, 1.025, 1.026, 1.028, 1.029, 1.03] // 1.02 <= rate <= 1.03
     
     var menuElements: [SKNode] = []
     var hoops: [(sprite: SKSpriteNode, attributes: (scale: CGFloat, positionRatio: (x: CGFloat, y: CGFloat)))] = []
@@ -51,7 +55,7 @@ class GameScene: SKScene {
     
     override func didMove(to view: SKView) {
         addChild(worldNode)
-        self.backgroundColor = bgColor
+        self.backgroundColor = Config.bgColor
         createLabels()
         createCourt()
         createBall()
@@ -64,6 +68,8 @@ class GameScene: SKScene {
         } else {
             canPlay = false
         }
+        
+        currentCourtIncreaseRate = courtIncreaseRates[0]
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -158,11 +164,17 @@ class GameScene: SKScene {
         if gameStarted {
             growCourt()
             growHoops()
+            
             if ballIsAtGoal() {
                 // Check if player scored hoop
                 if scoredBasket() {
-                    score = score + 1
+                    score += 1
                     scoreLabel.text = "Score: \(score)"
+                    
+                    if currentDifficultyStep < difficultySteps.count - 1 && score >= difficultySteps[currentDifficultyStep + 1] {
+                        currentDifficultyStep += 1
+                        currentCourtIncreaseRate = courtIncreaseRates[currentDifficultyStep]
+                    }
                     
                     if soundIsOn {
                         scoreSound.run(SKAction.play())
@@ -255,7 +267,7 @@ class GameScene: SKScene {
     }
     
     func endGame() {
-        self.backgroundColor = bgColor
+        self.backgroundColor = Config.bgColor
         
         finishedGame = true
         
