@@ -153,7 +153,7 @@ extension GameScene {
             let hoopPositionRatio = ((newHoop.position.x - court.leftmostPoint) / court.width, (newHoop.position.y - court.bottomPoint) / court.height)
             
             newHoop.zPosition = 2
-            hoops.append((newHoop, (hoopScale, hoopPositionRatio)))
+            hoops.append((newHoop, (Directions.randomDirection(), hoopScale, hoopPositionRatio)))
             worldNode.addChild(newHoop)
         }
     }

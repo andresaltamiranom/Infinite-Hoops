@@ -10,6 +10,25 @@ import SpriteKit
 import GameplayKit
 import CoreMotion
 
+enum Directions: UInt32 {
+    case N, S, E, W, NE, NW, SE, SW, none
+    
+    private static let _count: Directions.RawValue = {
+        // find the maximum enum value
+        var maxValue: UInt32 = 0
+        while let _ = Directions(rawValue: maxValue) {
+            maxValue += 1
+        }
+        return maxValue
+    }()
+    
+    static func randomDirection() -> Directions {
+        // pick and return a new value
+        let rand = arc4random_uniform(_count)
+        return Directions(rawValue: rand)!
+    }
+}
+
 class GameScene: SKScene {
     var viewController : UIViewController!
     let worldNode = SKNode()
@@ -31,8 +50,11 @@ class GameScene: SKScene {
     
     // Constant values
     let ballSpeed: Double = 25.0
-    let basketsInARowToRegainHoop: Int = 10
     let maxHoops = 5
+    let basketsInARowToRegainHoop: Int = 10
+    let difficultySteps: [Int] = [0, 5, 15, 30, 50, 75, 100, 150, 300]
+    let hoopMovementSpeeds: [CGFloat] = [0, 0.001, 0.001, 0.001, 0.002, 0.002, 0.002, 0.003, 0.003] // speed <= 0.003
+    let courtIncreaseRates: [CGFloat] = [1.02, 1.02, 1.022, 1.023, 1.025, 1.026, 1.028, 1.029, 1.03] // 1.02 <= rate <= 1.03
     
     // Game Variables
     var canPlay = true
@@ -47,11 +69,10 @@ class GameScene: SKScene {
     
     var currentDifficultyStep = 0
     var currentCourtIncreaseRate: CGFloat = 0
-    var difficultySteps: [Int] = [0, 5, 15, 30, 50, 75, 100, 150, 300]
-    var courtIncreaseRates: [CGFloat] = [1.02, 1.02, 1.022, 1.023, 1.025, 1.026, 1.028, 1.029, 1.03] // 1.02 <= rate <= 1.03
+    var currentHoopMovementSpeed: CGFloat = 0
     
     var menuElements: [SKNode] = []
-    var hoops: [(sprite: SKSpriteNode, attributes: (scale: CGFloat, positionRatio: (x: CGFloat, y: CGFloat)))] = []
+    var hoops: [(sprite: SKSpriteNode, attributes: (direction: Directions, scale: CGFloat, positionRatio: (x: CGFloat, y: CGFloat)))] = []
     
     var motionManager = CMMotionManager()
     var referenceAttitude: CMAttitude?
@@ -73,6 +94,7 @@ class GameScene: SKScene {
         }
         
         currentCourtIncreaseRate = courtIncreaseRates[0]
+        currentHoopMovementSpeed = hoopMovementSpeeds[0]
         hoopsLeft = maxHoops
     }
     
@@ -168,6 +190,7 @@ class GameScene: SKScene {
         if gameStarted {
             growCourt()
             growHoops()
+            moveHoops()
             
             if ballIsAtGoal() {
                 // Check if player scored hoop
@@ -185,6 +208,7 @@ class GameScene: SKScene {
                     if currentDifficultyStep < difficultySteps.count - 1 && score >= difficultySteps[currentDifficultyStep + 1] {
                         currentDifficultyStep += 1
                         currentCourtIncreaseRate = courtIncreaseRates[currentDifficultyStep]
+                        currentHoopMovementSpeed = hoopMovementSpeeds[currentDifficultyStep]
                     }
                     
                     if soundIsOn {
@@ -222,22 +246,22 @@ class GameScene: SKScene {
         return false
     }
     
-    func makeSureBallDoesntGoOutOfBounds(with moveToMake: CGVector) -> (Bool, Bool) {
+    func keepSpriteInRect(_ sprite: SKSpriteNode, in container: CGRect, with moveToMake: CGVector) -> (Bool, Bool) {
         var willGoOutOfBoundsX = false
-        if ball.leftmostPoint + moveToMake.dx < self.frame.minX {
-            ball.position.x = self.frame.minX + ball.width * 0.5
+        if sprite.leftmostPoint + moveToMake.dx < container.minX {
+            sprite.position.x = container.minX + sprite.width * 0.5
             willGoOutOfBoundsX = true
-        } else if ball.rightmostPoint + moveToMake.dx > self.frame.maxX {
-            ball.position.x = self.frame.maxX - ball.width * 0.5
+        } else if sprite.rightmostPoint + moveToMake.dx > container.maxX {
+            sprite.position.x = container.maxX - sprite.width * 0.5
             willGoOutOfBoundsX = true
         }
         
         var willGoOutOfBoundsY = false
-        if ball.bottomPoint + moveToMake.dy < self.frame.minY {
-            ball.position.y = self.frame.minY + ball.height * 0.5
+        if sprite.bottomPoint + moveToMake.dy < container.minY {
+            sprite.position.y = container.minY + sprite.height * 0.5
             willGoOutOfBoundsY = true
-        } else if ball.topPoint + moveToMake.dy > self.frame.maxY {
-            ball.position.y = self.frame.maxY - ball.height * 0.5
+        } else if sprite.topPoint + moveToMake.dy > container.maxY {
+            sprite.position.y = container.maxY - sprite.height * 0.5
             willGoOutOfBoundsY = true
         }
         
@@ -246,7 +270,7 @@ class GameScene: SKScene {
     
     func updateBallMovement() {
         var ballMovement = getMotionVector()
-        let ballWillGoOut: (inX: Bool, inY: Bool) = makeSureBallDoesntGoOutOfBounds(with: ballMovement)
+        let ballWillGoOut: (inX: Bool, inY: Bool) = keepSpriteInRect(ball, in: self.frame, with: ballMovement)
         
         if ballWillGoOut.inX { ballMovement.dx = 0 }
         if ballWillGoOut.inY { ballMovement.dy = 0 }
@@ -258,6 +282,47 @@ class GameScene: SKScene {
         for hoop in hoops {
             hoop.sprite.size = CGSize(width: court.height * hoop.attributes.scale, height: court.height * hoop.attributes.scale)
             hoop.sprite.position = CGPoint(x: court.leftmostPoint + court.width * hoop.attributes.positionRatio.x, y: court.bottomPoint + court.height * hoop.attributes.positionRatio.y)
+        }
+    }
+    
+    func moveHoops() {
+        for (index, hoop) in hoops.enumerated() {
+            var hoopMovement = CGVector(dx: 0, dy: 0)
+            let distance = court.height * currentHoopMovementSpeed
+            
+            switch hoop.attributes.direction {
+            case .N:
+                hoopMovement.dy = distance
+            case .S:
+                hoopMovement.dy = -distance
+            case .E:
+                hoopMovement.dx = distance
+            case .W:
+                hoopMovement.dx = -distance
+            case .NE:
+                hoopMovement.dx = distance
+                hoopMovement.dy = distance
+            case .NW:
+                hoopMovement.dx = -distance
+                hoopMovement.dy = distance
+            case .SE:
+                hoopMovement.dx = distance
+                hoopMovement.dy = -distance
+            case .SW:
+                hoopMovement.dx = -distance
+                hoopMovement.dy = -distance
+            case .none:
+                break
+            }
+            
+            let hoopWillGoOut: (inX: Bool, inY: Bool) = keepSpriteInRect(hoop.sprite, in: court.frame, with: hoopMovement)
+            if hoopWillGoOut.inX { hoopMovement.dx = 0 }
+            if hoopWillGoOut.inY { hoopMovement.dy = 0 }
+            
+            hoop.sprite.position.x += hoopMovement.dx
+            hoop.sprite.position.y += hoopMovement.dy
+            
+            hoops[index].attributes.positionRatio = ((hoop.sprite.position.x - court.leftmostPoint) / court.width, (hoop.sprite.position.y - court.bottomPoint) / court.height)
         }
     }
     
