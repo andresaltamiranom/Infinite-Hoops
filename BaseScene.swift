@@ -19,6 +19,7 @@ class BaseScene: SKScene {
     let ball = SKSpriteNode(imageNamed: "ball")
     
     // Sounds
+    let gameBGM = SKAudioNode(fileNamed: "Updown.mp3")
     let scoreSound = SKAudioNode(fileNamed: "goal.wav")
     let missSound = SKAudioNode(fileNamed: "miss.mp3")
     

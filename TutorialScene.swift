@@ -12,9 +12,6 @@ import CoreMotion
 
 class TutorialScene: BaseScene {
     
-    // Sound
-    let tutorialBGM = SKAudioNode(fileNamed: "Updown.mp3")
-    
     // Global variables
     var toldCantPlay = false
     var canMove = false
@@ -27,8 +24,7 @@ class TutorialScene: BaseScene {
     
     override func didMove(to view: SKView) {
         super.didMove(to: view)
-        
-        createSound()
+        super.createBaseSound()
         
         if canPlay {
             startTutorial(part: 1)

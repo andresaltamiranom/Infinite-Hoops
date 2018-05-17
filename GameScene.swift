@@ -39,7 +39,6 @@ class GameScene: BaseScene {
     var scoreLabel = SKLabelNode()
     
     // Sounds
-    let gameBGM = SKAudioNode(fileNamed: "Updown.mp3")
     let loseSound = SKAudioNode(fileNamed: "lose.wav")
     
     // Constant values

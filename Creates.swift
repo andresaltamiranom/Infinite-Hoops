@@ -82,15 +82,11 @@ extension GameScene {
         soundButton.position = Config.menuButton.positions[0]
         soundButton.texture = soundIsOn ? SKTexture(imageNamed: "sound") : SKTexture(imageNamed: "mute")
         
-        gameBGM.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 0.0))
         loseSound.run(SKAction.changeVolume(to: soundIsOn ? 1.0 : 0.0, duration: 0.0))
-        
-        gameBGM.autoplayLooped = true
         loseSound.autoplayLooped = false
         
         menuElements.append(soundButton)
         
-        addChild(gameBGM)
         addChild(soundButton)
         addChild(loseSound)
     }
@@ -99,10 +95,6 @@ extension GameScene {
 extension TutorialScene {
     func createSound() {
         super.createBaseSound()
-        
-        tutorialBGM.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 0.0))
-        tutorialBGM.autoplayLooped = true
-        addChild(tutorialBGM)
     }
 }
 
@@ -110,12 +102,15 @@ extension BaseScene {
     func createBaseSound() {
         soundIsOn = UserDefaults.standard.bool(forKey: "sound")
         
+        gameBGM.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 0.0))
         scoreSound.run(SKAction.changeVolume(to: soundIsOn ? 1.0 : 0.0, duration: 0.0))
         missSound.run(SKAction.changeVolume(to: soundIsOn ? 1.0 : 0.0, duration: 0.0))
         
+        gameBGM.autoplayLooped = true
         scoreSound.autoplayLooped = false
         missSound.autoplayLooped = false
         
+        addChild(gameBGM)
         addChild(scoreSound)
         addChild(missSound)
     }
