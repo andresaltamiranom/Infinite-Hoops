@@ -15,7 +15,8 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let scene = GameScene(size: view.bounds.size)
+        let completedTutorial = UserDefaults.standard.bool(forKey: "completedTutorial")
+        let scene = completedTutorial ? GameScene(size: view.bounds.size) : TutorialScene(size: view.bounds.size)
         let skView = view as! SKView
         skView.showsFPS = false
         skView.showsNodeCount = false
@@ -26,7 +27,7 @@ class GameViewController: UIViewController {
     }
 
     override var shouldAutorotate: Bool {
-        return true
+        return false
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
@@ -35,7 +36,6 @@ class GameViewController: UIViewController {
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Release any cached data, images, etc that aren't in use.
     }
 
     override var prefersStatusBarHidden: Bool {

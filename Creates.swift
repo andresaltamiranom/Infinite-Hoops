@@ -11,12 +11,6 @@ import SpriteKit
 
 extension GameScene {
     func createLabels() {
-        let dunkTheBallLabel = createLabel(
-            text: "Dunk the ball inside any of the hoops to score.",
-            fontSize: size.width / 37.5,
-            xPos: size.width * 0.5,
-            yPos: size.height * 0.66)
-        
         let highscoreLabel = createLabel(
             text: "Highscore: \(UserDefaults.standard.integer(forKey: "highscore"))",
             horizontalAlignment: .right,
@@ -36,12 +30,6 @@ extension GameScene {
             xPos: size.width * 0.5,
             yPos: size.height * 0.73)
         
-        let tiltToMoveLabel = createLabel(
-            text: "Tilt your device to move the ball.",
-            fontSize: size.width / 37.5,
-            xPos: size.width * 0.5,
-            yPos: size.height * 0.8)
-        
         pausedLabel = createLabel(
             text: "Paused",
             horizontalAlignment: .left,
@@ -60,75 +48,87 @@ extension GameScene {
             isHidden: true,
             zPosition: 10)
         
-        menuElements += [dunkTheBallLabel,
-                         highscoreLabel,
+        menuElements += [highscoreLabel,
                          tapAnywhereToPlayLabel,
-                         tapToPauseAndRecalibrateLabel,
-                         tiltToMoveLabel]
+                         tapToPauseAndRecalibrateLabel]
         
-        addChild(dunkTheBallLabel)
         addChild(highscoreLabel)
         addChild(tapAnywhereToPlayLabel)
         addChild(tapToPauseAndRecalibrateLabel)
-        addChild(tiltToMoveLabel)
         addChild(pausedLabel)
         addChild(scoreLabel)
     }
     
-    func createMenuShareButton() {
-        shareButton.size = sound.size
-        shareButton.position = CGPoint(x: sound.position.x, y: sound.position.y - shareButton.height - size.height * 0.05)
-        menuElements.append(shareButton)
+    func createShareButton(inMenu: Bool = false) {
+        if inMenu {
+            shareButton.size = Config.menuButton.size
+            shareButton.position = Config.menuButton.positions[1]
+            menuElements.append(shareButton)
+        } else {
+            shareButton.size = Config.shareButton.size
+            shareButton.position = Config.shareButton.position
+            
+            let shareButtonText = createLabel(text: "SHARE", fontSize: size.width / 37.5, xPos: 0, yPos: 0)
+            shareButtonText.position = CGPoint(x: shareButton.position.x, y: shareButton.position.y - shareButton.height * 0.5 - shareButtonText.frame.height)
+            addChild(shareButtonText)
+        }
         addChild(shareButton)
     }
     
-    func createShareButton() {
-        shareButton.size = CGSize(width: size.width * 0.1, height: size.width * 0.1)
-        shareButton.position = CGPoint(x: size.width * 0.985 - shareButton.width * 0.5, y: size.height * 0.985 - shareButton.height * 0.5)
-        addChild(shareButton)
+    func createSound() {
+        super.createBaseSound()
         
-        let shareButtonText = SKLabelNode(fontNamed: "AmericanTypewriter-Bold")
-        shareButtonText.text = "SHARE"
-        shareButtonText.fontColor = SKColor.black
-        shareButtonText.horizontalAlignmentMode = .center
-        shareButtonText.fontSize = size.width / 37.5
-        shareButtonText.position = CGPoint(x: shareButton.position.x, y: shareButton.position.y - shareButton.height * 0.5 - shareButtonText.frame.height)
-        addChild(shareButtonText)
-    }
-    
-    func createSoundStuff() {
-        soundIsOn = UserDefaults.standard.bool(forKey: "sound")
+        soundButton.size = Config.menuButton.size
+        soundButton.position = Config.menuButton.positions[0]
+        soundButton.texture = soundIsOn ? SKTexture(imageNamed: "sound") : SKTexture(imageNamed: "mute")
         
-        sound.size = CGSize(width: size.width * 0.065, height: size.width * 0.065)
-        sound.position = CGPoint(x: size.width * 0.05, y: size.height * 0.9 + sound.height * 0.2)
-        sound.texture = soundIsOn ? SKTexture(imageNamed: "sound") : SKTexture(imageNamed: "mute")
-        
-        bgm.name = "bgm"
-        bgm.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 0.0))
-        scoreSound.run(SKAction.changeVolume(to: soundIsOn ? 1.0 : 0.0, duration: 0.0))
+        gameBGM.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 0.0))
         loseSound.run(SKAction.changeVolume(to: soundIsOn ? 1.0 : 0.0, duration: 0.0))
         
-        bgm.autoplayLooped = true
-        scoreSound.autoplayLooped = false
+        gameBGM.autoplayLooped = true
         loseSound.autoplayLooped = false
         
-        menuElements.append(sound)
+        menuElements.append(soundButton)
         
-        addChild(bgm)
-        addChild(sound)
-        addChild(scoreSound)
+        addChild(gameBGM)
+        addChild(soundButton)
         addChild(loseSound)
     }
-    
-    func createCourt() {
-        court.size = CGSize(width: size.width * 0.1, height: size.height * 0.1)
-        originalCourtSize = court.size
-        court.position = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
-        court.zPosition = 1
-        worldNode.addChild(court)
+}
+
+extension TutorialScene {
+    func createSound() {
+        super.createBaseSound()
+        
+        tutorialBGM.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 0.0))
+        tutorialBGM.autoplayLooped = true
+        addChild(tutorialBGM)
+    }
+}
+
+extension BaseScene {
+    func createBaseSound() {
+        soundIsOn = UserDefaults.standard.bool(forKey: "sound")
+        
+        scoreSound.run(SKAction.changeVolume(to: soundIsOn ? 1.0 : 0.0, duration: 0.0))
+        missSound.run(SKAction.changeVolume(to: soundIsOn ? 1.0 : 0.0, duration: 0.0))
+        
+        scoreSound.autoplayLooped = false
+        missSound.autoplayLooped = false
+        
+        addChild(scoreSound)
+        addChild(missSound)
     }
     
-    func createHoops() {
+    func createCourt(shouldFade: Bool = false) {
+        court.size = Config.court.originalSize
+        court.position = Config.court.position
+        court.zPosition = 1
+        
+        addNode(node: court, fade: shouldFade)
+    }
+    
+    func createHoops(shouldFade: Bool = false) {
         for hoop in hoops {
             hoop.sprite.removeFromParent()
         }
@@ -154,15 +154,16 @@ extension GameScene {
             
             newHoop.zPosition = 2
             hoops.append((newHoop, (Directions.randomDirection(), hoopScale, hoopPositionRatio)))
-            worldNode.addChild(newHoop)
+            
+            addNode(node: newHoop, fade: shouldFade)
         }
     }
     
-    func createBall() {
-        ball.size = CGSize(width: size.height * 0.15, height: size.height * 0.15) // same dimensions to keep ball round
-        ball.position = CGPoint(x: size.width * 0.5, y: size.height * 0.2)
+    func createBall(shouldFade: Bool = false) {
+        ball.size = Config.ball.size
+        ball.position = Config.ball.initialPosition
         ball.zPosition = 10
         
-        worldNode.addChild(ball)
+        addNode(node: ball, fade: shouldFade)
     }
 }

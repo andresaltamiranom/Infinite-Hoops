@@ -29,73 +29,49 @@ enum Directions: UInt32 {
     }
 }
 
-class GameScene: SKScene {
-    var viewController : UIViewController!
-    let worldNode = SKNode()
-    
+class GameScene: BaseScene {
     // Sprites
-    let ball = SKSpriteNode(imageNamed: "ball")
-    let court = SKSpriteNode(imageNamed: "court")
     let shareButton = SKSpriteNode(imageNamed: "share_button")
-    let sound = SKSpriteNode(imageNamed: "sound")
+    let soundButton = SKSpriteNode(imageNamed: "sound")
     
     // Labels
     var pausedLabel = SKLabelNode()
     var scoreLabel = SKLabelNode()
     
     // Sounds
-    let bgm = SKAudioNode(fileNamed: "Updown.mp3")
+    let gameBGM = SKAudioNode(fileNamed: "Updown.mp3")
     let loseSound = SKAudioNode(fileNamed: "lose.wav")
-    let scoreSound = SKAudioNode(fileNamed: "goal.wav")
     
     // Constant values
-    let ballSpeed: Double = 25.0
-    let maxHoops = 5
-    let basketsInARowToRegainHoop: Int = 10
     let difficultySteps: [Int] = [0, 5, 15, 30, 50, 75, 100, 150, 300]
     let hoopMovementSpeeds: [CGFloat] = [0, 0.001, 0.001, 0.001, 0.002, 0.002, 0.002, 0.003, 0.003] // speed <= 0.003
     let courtIncreaseRates: [CGFloat] = [1.02, 1.02, 1.022, 1.023, 1.025, 1.026, 1.028, 1.029, 1.03] // 1.02 <= rate <= 1.03
     
     // Game Variables
-    var canPlay = true
     var gameStarted = false
     var gameIsPaused = false
     var finishedGame = false
-    var soundIsOn = true
     var score: Int = 0
-    var hoopsLeft: Int = 0
     var basketsScoredInARow: Int = 0
-    var originalCourtSize = CGSize(width: 0, height: 0)
     
     var currentDifficultyStep = 0
-    var currentCourtIncreaseRate: CGFloat = 0
     var currentHoopMovementSpeed: CGFloat = 0
     
     var menuElements: [SKNode] = []
-    var hoops: [(sprite: SKSpriteNode, attributes: (direction: Directions, scale: CGFloat, positionRatio: (x: CGFloat, y: CGFloat)))] = []
-    
-    var motionManager = CMMotionManager()
-    var referenceAttitude: CMAttitude?
     
     override func didMove(to view: SKView) {
-        addChild(worldNode)
-        self.backgroundColor = Config.bgColor
+        super.didMove(to: view)
+        
         createLabels()
         createCourt()
         createBall()
-        createSoundStuff()
-        createMenuShareButton()
+        createSound()
+        createShareButton(inMenu: true)
         
-        if motionManager.isDeviceMotionAvailable {
-            motionManager.startDeviceMotionUpdates()
-            motionManager.deviceMotionUpdateInterval = 0.05
-        } else {
-            canPlay = false
+        if canPlay {
+            currentCourtIncreaseRate = courtIncreaseRates[0]
+            currentHoopMovementSpeed = hoopMovementSpeeds[0]
         }
-        
-        currentCourtIncreaseRate = courtIncreaseRates[0]
-        currentHoopMovementSpeed = hoopMovementSpeeds[0]
-        hoopsLeft = maxHoops
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -125,17 +101,17 @@ class GameScene: SKScene {
                     calibrate()
                     worldNode.isPaused = false
                     gameIsPaused = false
-                    bgm.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 0.0))
+                    gameBGM.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 0.0))
                 } else { // game started but player has lost
                     endGame() // goes to results screen
                 }
             } else {
                 if !gameStarted {
-                    if sound.contains(location) {
+                    if soundButton.contains(location) {
                         soundIsOn = !soundIsOn
-                        sound.texture = soundIsOn ? SKTexture(imageNamed: "sound") : SKTexture(imageNamed: "mute")
+                        soundButton.texture = soundIsOn ? SKTexture(imageNamed: "sound") : SKTexture(imageNamed: "mute")
                         UserDefaults.standard.set(soundIsOn, forKey: "sound")
-                        bgm.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 1.0))
+                        gameBGM.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 1.0))
                     } else if shareButton.contains(location) {
                         let hs = UserDefaults.standard.integer(forKey: "highscore")
                         let textToShare = "Can you beat my highscore of \(hs) \(hs == 1 ? "basket" : "baskets") on Infinite Hoops? Come try, it's free! #InfiniteHoops"
@@ -152,10 +128,7 @@ class GameScene: SKScene {
                         self.viewController.present(activityVC, animated: true, completion: nil)
                     } else {
                         if !canPlay {
-                            let alertView = UIAlertController(title: "Unable to play", message: "Device motion not available.", preferredStyle: .alert)
-                            let action = UIAlertAction(title: "OK", style: .default, handler: { (alert) in })
-                            alertView.addAction(action)
-                            self.viewController.present(alertView, animated: true, completion: nil)
+                            showCantPlayAlert()
                         } else {
                             // start the game
                             gameStarted = true
@@ -174,7 +147,7 @@ class GameScene: SKScene {
                     pausedLabel.isHidden = false
                     worldNode.isPaused = true
                     gameIsPaused = true
-                    bgm.run(SKAction.changeVolume(to: 0.0, duration: 0.0))
+                    gameBGM.run(SKAction.changeVolume(to: 0.0, duration: 0.0))
                 }
             }
         }
@@ -229,59 +202,17 @@ class GameScene: SKScene {
                         worldNode.isPaused = true
                         return
                     }
+                    
+                    if soundIsOn {
+                        missSound.run(SKAction.play())
+                    }
                 }
                 
-                court.size = originalCourtSize
+                court.size = Config.court.originalSize
                 createHoops()
             }
             
             updateBallMovement()
-        }
-    }
-    
-    func scoredBasket() -> Bool {
-        for hoop in hoops {
-            if circleContainsCircle(hoop.sprite, ball) { return true }
-        }
-        return false
-    }
-    
-    func keepSpriteInRect(_ sprite: SKSpriteNode, in container: CGRect, with moveToMake: CGVector) -> (Bool, Bool) {
-        var willGoOutOfBoundsX = false
-        if sprite.leftmostPoint + moveToMake.dx < container.minX {
-            sprite.position.x = container.minX + sprite.width * 0.5
-            willGoOutOfBoundsX = true
-        } else if sprite.rightmostPoint + moveToMake.dx > container.maxX {
-            sprite.position.x = container.maxX - sprite.width * 0.5
-            willGoOutOfBoundsX = true
-        }
-        
-        var willGoOutOfBoundsY = false
-        if sprite.bottomPoint + moveToMake.dy < container.minY {
-            sprite.position.y = container.minY + sprite.height * 0.5
-            willGoOutOfBoundsY = true
-        } else if sprite.topPoint + moveToMake.dy > container.maxY {
-            sprite.position.y = container.maxY - sprite.height * 0.5
-            willGoOutOfBoundsY = true
-        }
-        
-        return (willGoOutOfBoundsX, willGoOutOfBoundsY)
-    }
-    
-    func updateBallMovement() {
-        var ballMovement = getMotionVector()
-        let ballWillGoOut: (inX: Bool, inY: Bool) = keepSpriteInRect(ball, in: self.frame, with: ballMovement)
-        
-        if ballWillGoOut.inX { ballMovement.dx = 0 }
-        if ballWillGoOut.inY { ballMovement.dy = 0 }
-        
-        ball.run(SKAction.move(by: ballMovement, duration: 0.05))
-    }
-    
-    func growHoops() {
-        for hoop in hoops {
-            hoop.sprite.size = CGSize(width: court.height * hoop.attributes.scale, height: court.height * hoop.attributes.scale)
-            hoop.sprite.position = CGPoint(x: court.leftmostPoint + court.width * hoop.attributes.positionRatio.x, y: court.bottomPoint + court.height * hoop.attributes.positionRatio.y)
         }
     }
     
@@ -324,27 +255,6 @@ class GameScene: SKScene {
             
             hoops[index].attributes.positionRatio = ((hoop.sprite.position.x - court.leftmostPoint) / court.width, (hoop.sprite.position.y - court.bottomPoint) / court.height)
         }
-    }
-    
-    func growCourt() {
-        court.size = CGSize(width: court.size.width * currentCourtIncreaseRate , height: court.size.height * currentCourtIncreaseRate)
-    }
-    
-    func ballIsAtGoal() -> Bool {
-        return court.topPoint > self.frame.maxY || court.bottomPoint < self.frame.minY
-    }
-    
-    func calibrate() {
-        referenceAttitude = motionManager.deviceMotion?.attitude.copy() as? CMAttitude
-    }
-    
-    func getMotionVector() -> CGVector {
-        let attitude = motionManager.deviceMotion?.attitude;
-        
-        // Use start orientation to calibrate
-        attitude!.multiply(byInverseOf: referenceAttitude!)
-        
-        return CGVector(dx: attitude!.pitch * ballSpeed, dy: attitude!.roll  * ballSpeed)
     }
     
     func endGame() {

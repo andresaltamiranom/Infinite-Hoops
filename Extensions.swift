@@ -6,7 +6,6 @@
 //  Copyright © 2018 AndresAltamirano. All rights reserved.
 //
 
-import Foundation
 import SpriteKit
 
 extension UIColor {
@@ -37,16 +36,41 @@ extension SKShapeNode {
     var height: CGFloat { return self.frame.height }
 }
 
-extension GameScene {
-    func checkForHighscore() -> Bool {
-        let highscore = UserDefaults.standard.integer(forKey: "highscore")
-        if score > highscore {
-            UserDefaults.standard.set(score, forKey: "highscore")
-            return true
+extension BaseScene {
+    func addNode(node: SKNode, fade: Bool = false) {
+        if fade {
+            node.alpha = 0
+            worldNode.addChild(node)
+            node.run(SKAction.fadeIn(withDuration: 1.0))
+        } else {
+            worldNode.addChild(node)
         }
-        return false
     }
     
+    func keepSpriteInRect(_ sprite: SKSpriteNode, in container: CGRect, with moveToMake: CGVector) -> (Bool, Bool) {
+        var willGoOutOfBoundsX = false
+        if sprite.leftmostPoint + moveToMake.dx < container.minX {
+            sprite.position.x = container.minX + sprite.width * 0.5
+            willGoOutOfBoundsX = true
+        } else if sprite.rightmostPoint + moveToMake.dx > container.maxX {
+            sprite.position.x = container.maxX - sprite.width * 0.5
+            willGoOutOfBoundsX = true
+        }
+        
+        var willGoOutOfBoundsY = false
+        if sprite.bottomPoint + moveToMake.dy < container.minY {
+            sprite.position.y = container.minY + sprite.height * 0.5
+            willGoOutOfBoundsY = true
+        } else if sprite.topPoint + moveToMake.dy > container.maxY {
+            sprite.position.y = container.maxY - sprite.height * 0.5
+            willGoOutOfBoundsY = true
+        }
+        
+        return (willGoOutOfBoundsX, willGoOutOfBoundsY)
+    }
+}
+
+extension SKScene {
     func createLabel(font: String = Config.defaultFont, text: String, fontColor: SKColor = Config.defaultFontColor, horizontalAlignment: SKLabelHorizontalAlignmentMode = .center, verticalAlignment: SKLabelVerticalAlignmentMode = .baseline, fontSize: CGFloat, xPos: CGFloat, yPos: CGFloat, isHidden: Bool = false, zPosition: CGFloat = 0) -> SKLabelNode {
         let label = SKLabelNode(fontNamed: font)
         label.text = text
@@ -84,11 +108,35 @@ extension GameScene {
         return sqrt(pow(p1.x-p2.x, 2) + pow(p1.y-p2.y, 2))
     }
     
+    func fadeAndRemove(node: SKNode) {
+        let fadeOutAction = SKAction.fadeOut(withDuration: 2.0)
+        let remove        = SKAction.run({ node.removeFromParent }())
+        let sequence      = SKAction.sequence([fadeOutAction, remove])
+        node.run(sequence)
+    }
+    
     fileprivate func random() -> CGFloat{
         return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
     }
     
     func random(min : CGFloat, max : CGFloat) -> CGFloat{
         return random() * (max - min) + min
+    }
+}
+
+extension GameScene {
+    func checkForHighscore() -> Bool {
+        let highscore = UserDefaults.standard.integer(forKey: "highscore")
+        if score > highscore {
+            UserDefaults.standard.set(score, forKey: "highscore")
+            return true
+        }
+        return false
+    }
+}
+
+extension TutorialScene {
+    func movedBallFromInitialPosition() -> Bool {
+        return eulerDistance(ball.position, Config.ball.initialPosition) > 15
     }
 }
