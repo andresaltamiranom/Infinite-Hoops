@@ -133,6 +133,19 @@ extension GameScene {
         }
         return false
     }
+    
+    func share(_ message: String) {
+        let objectsToShare = [message]
+        let activityVC = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
+        activityVC.excludedActivityTypes = [UIActivityType.airDrop, UIActivityType.addToReadingList]
+        
+        if let popOver = activityVC.popoverPresentationController {
+            popOver.sourceView = self.viewController.view
+            popOver.sourceRect = self.viewController.view.bounds
+        }
+        
+        self.viewController.present(activityVC, animated: true, completion: nil)
+    }
 }
 
 extension TutorialScene {

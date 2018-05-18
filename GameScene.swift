@@ -117,16 +117,7 @@ class GameScene: BaseScene {
                     if shareButton.contains(location) {
                         let textToShare = "I just scored \(score) \(score == 1 ? "basket" : "baskets") on Infinite Hoops! Try to beat me, it's free! #InfiniteHoops"
                         
-                        let objectsToShare = [textToShare]
-                        let activityVC = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
-                        activityVC.excludedActivityTypes = [UIActivityType.airDrop, UIActivityType.addToReadingList]
-                        
-                        if let popOver = activityVC.popoverPresentationController {
-                            popOver.sourceView = self.viewController.view
-                            popOver.sourceRect = self.viewController.view.bounds
-                        }
-                        
-                        self.viewController.present(activityVC, animated: true, completion: nil)
+                        share(textToShare)
                     } else {
                         exitGame() // goes back to main menu screen
                     }
@@ -152,16 +143,7 @@ class GameScene: BaseScene {
                         let hs = UserDefaults.standard.integer(forKey: "highscore")
                         let textToShare = "Can you beat my highscore of \(hs) \(hs == 1 ? "basket" : "baskets") on Infinite Hoops? Come try, it's free! #InfiniteHoops"
                         
-                        let objectsToShare = [textToShare]
-                        let activityVC = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
-                        activityVC.excludedActivityTypes = [UIActivityType.airDrop, UIActivityType.addToReadingList]
-                        
-                        if let popOver = activityVC.popoverPresentationController {
-                            popOver.sourceView = self.viewController.view
-                            popOver.sourceRect = self.viewController.view.bounds
-                        }
-                        
-                        self.viewController.present(activityVC, animated: true, completion: nil)
+                        share(textToShare)
                     } else if noAds.contains(location) && noAds.parent != nil {
                         let alertController = UIAlertController(title: "Purchase No Ads", message: "", preferredStyle: .alert)
                         
