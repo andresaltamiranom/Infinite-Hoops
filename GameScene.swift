@@ -52,11 +52,11 @@ class GameScene: BaseScene {
     var finishedGame = false
     var score: Int = 0
     var basketsScoredInARow: Int = 0
+    var menuElements: [SKNode] = []
+    var scoredBaskets: [SKSpriteNode] = []
     
     var currentDifficultyStep = 0
     var currentHoopMovementSpeed: CGFloat = 0
-    
-    var menuElements: [SKNode] = []
     
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -172,6 +172,8 @@ class GameScene: BaseScene {
                     
                     basketsScoredInARow += 1
                     
+                    scoredBaskets.append(ball.copy() as! SKSpriteNode)
+                    
                     if basketsScoredInARow == basketsInARowToRegainHoop {
                         basketsScoredInARow = 0
                         hoopsLeft = min(hoopsLeft + 1, maxHoops)
@@ -256,6 +258,19 @@ class GameScene: BaseScene {
         }
     }
     
+    func showAllBaskets() {
+        court.size = CGSize(width: size.width * 0.5, height: size.height * 0.5)
+        court.position = CGPoint(x: size.width * 0.5, y: size.height * 0.65)
+        worldNode.addChild(court)
+        
+        for basket in scoredBaskets {
+            let basketRatio = (x: basket.position.x / size.width, y: basket.position.y / size.height)
+            basket.position = CGPoint(x: court.leftmostPoint + court.width * basketRatio.x, y: court.bottomPoint + court.height * basketRatio.y)
+            basket.size = CGSize(width: size.height * 0.15 * 0.5, height: size.height * 0.15 * 0.5)
+            worldNode.addChild(basket)
+        }
+    }
+    
     func endGame() {
         self.backgroundColor = Config.bgColor
         
@@ -265,6 +280,8 @@ class GameScene: BaseScene {
         worldNode.removeAllChildren()
         scoreLabel.removeFromParent()
         pausedLabel.removeFromParent()
+        
+        showAllBaskets()
         
         let beatHighscore = checkForHighscore()
         
