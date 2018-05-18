@@ -115,7 +115,7 @@ class GameScene: BaseScene {
                     }
                 } else {
                     if shareButton.contains(location) {
-                        let textToShare = "I just scored \(score) \(score == 1 ? "basket" : "baskets") on Infinite Hoops! Try to beat me, it's free! #InfiniteHoops"
+                        let textToShare = "I just scored \(score) \(score == 1 ? "basket" : "baskets") on Infinite Basketball Hoops! Try to beat me, it's free! #InfiniteBasketballHoops"
                         
                         share(textToShare)
                     } else {
@@ -141,7 +141,7 @@ class GameScene: BaseScene {
                         gameBGM.run(SKAction.changeVolume(to: soundIsOn ? 0.8 : 0.0, duration: 1.0))
                     } else if shareButton.contains(location) {
                         let hs = UserDefaults.standard.integer(forKey: "highscore")
-                        let textToShare = "Can you beat my highscore of \(hs) \(hs == 1 ? "basket" : "baskets") on Infinite Hoops? Come try, it's free! #InfiniteHoops"
+                        let textToShare = "Can you beat my highscore of \(hs) \(hs == 1 ? "basket" : "baskets") on Infinite Basketball Hoops? Come try, it's free! #InfiniteBasketballHoops"
                         
                         share(textToShare)
                     } else if noAds.contains(location) && noAds.parent != nil {
