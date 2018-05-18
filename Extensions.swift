@@ -146,6 +146,25 @@ extension GameScene {
         
         self.viewController.present(activityVC, animated: true, completion: nil)
     }
+    
+    func showPurchaseAlert() {
+        let alertController = UIAlertController(title: "Purchase No Ads", message: "", preferredStyle: .alert)
+        
+        let purchaseAction = UIAlertAction(title: "Purchase", style: .default) { (action) in
+            self.attemptToBuyNoAds()
+        }
+        alertController.addAction(purchaseAction)
+        
+        let restoreAction = UIAlertAction(title: "Restore purchase", style: .default) { (action) in
+            IAPHandler.shared.restorePurchase()
+        }
+        alertController.addAction(restoreAction)
+        
+        let closeAction = UIAlertAction(title: "Close", style: .cancel) { (action) in }
+        alertController.addAction(closeAction)
+        
+        viewController.present(alertController, animated: true, completion: nil)
+    }
 }
 
 extension TutorialScene {
