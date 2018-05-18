@@ -33,10 +33,17 @@ class GameScene: BaseScene {
     // Sprites
     let shareButton = SKSpriteNode(imageNamed: "share_button")
     let soundButton = SKSpriteNode(imageNamed: "sound")
+    let noAds = SKSpriteNode(imageNamed: "no_ads")
+    let closeBannerButton = SKSpriteNode(imageNamed: "close_banner")
+    
+    // Shapes
+    var bannerBackground = SKShapeNode()
     
     // Labels
     var pausedLabel = SKLabelNode()
     var scoreLabel = SKLabelNode()
+    var noAdsLabel = SKLabelNode()
+    var noAdsLabel2 = SKLabelNode()
     
     // Sounds
     let loseSound = SKAudioNode(fileNamed: "lose.wav")
@@ -50,6 +57,7 @@ class GameScene: BaseScene {
     var gameStarted = false
     var gameIsPaused = false
     var finishedGame = false
+    var bannerPresent = false
     var score: Int = 0
     var basketsScoredInARow: Int = 0
     var menuElements: [SKNode] = []
@@ -61,11 +69,30 @@ class GameScene: BaseScene {
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         
+        IAPHandler.shared.fetchAvailableProducts()
+        IAPHandler.shared.purchaseStatusBlock = {[weak self] (type) in
+            guard let strongSelf = self else { return }
+            if type == .purchased || type == .restored {
+                strongSelf.noAds.removeFromParent()
+                UserDefaults.standard.set(true, forKey: "purchasedNoAds")
+                let alertView = UIAlertController(title: "", message: type.message(), preferredStyle: .alert)
+                let action = UIAlertAction(title: "OK", style: .default, handler: { (alert) in })
+                alertView.addAction(action)
+                strongSelf.viewController.present(alertView, animated: true, completion: nil)
+            }
+        }
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(GameScene.nothingToRestore), name: NSNotification.Name(rawValue: "nothingToRestore"), object: nil)
+        
         createLabels()
         createCourt()
         createBall()
         createSound()
         createShareButton(inMenu: true)
+        
+        if !UserDefaults.standard.bool(forKey: "purchasedNoAds") {
+            createNoAdsButton()
+        }
         
         if canPlay {
             currentCourtIncreaseRate = courtIncreaseRates[0]
@@ -78,21 +105,31 @@ class GameScene: BaseScene {
             let location = touch.location(in: self)
             
             if finishedGame {
-                if shareButton.contains(location) {
-                    let textToShare = "I just scored \(score) \(score == 1 ? "basket" : "baskets") on Infinite Hoops! Try to beat me, it's free! #InfiniteHoops"
-                    
-                    let objectsToShare = [textToShare]
-                    let activityVC = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
-                    activityVC.excludedActivityTypes = [UIActivityType.airDrop, UIActivityType.addToReadingList]
-                    
-                    if let popOver = activityVC.popoverPresentationController {
-                        popOver.sourceView = self.viewController.view
-                        popOver.sourceRect = self.viewController.view.bounds
+                if bannerPresent {
+                    if closeBannerButton.contains(location) {
+                        closeBannerButton.removeFromParent()
+                        bannerBackground.removeFromParent()
+                        noAdsLabel.removeFromParent()
+                        noAdsLabel2.removeFromParent()
+                        bannerPresent = false
                     }
-                    
-                    self.viewController.present(activityVC, animated: true, completion: nil)
                 } else {
-                    exitGame() // goes back to main menu screen
+                    if shareButton.contains(location) {
+                        let textToShare = "I just scored \(score) \(score == 1 ? "basket" : "baskets") on Infinite Hoops! Try to beat me, it's free! #InfiniteHoops"
+                        
+                        let objectsToShare = [textToShare]
+                        let activityVC = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
+                        activityVC.excludedActivityTypes = [UIActivityType.airDrop, UIActivityType.addToReadingList]
+                        
+                        if let popOver = activityVC.popoverPresentationController {
+                            popOver.sourceView = self.viewController.view
+                            popOver.sourceRect = self.viewController.view.bounds
+                        }
+                        
+                        self.viewController.present(activityVC, animated: true, completion: nil)
+                    } else {
+                        exitGame() // goes back to main menu screen
+                    }
                 }
             } else if worldNode.isPaused {
                 if gameStarted { // unpausing started game
@@ -125,6 +162,23 @@ class GameScene: BaseScene {
                         }
                         
                         self.viewController.present(activityVC, animated: true, completion: nil)
+                    } else if noAds.contains(location) && noAds.parent != nil {
+                        let alertController = UIAlertController(title: "Purchase No Ads", message: "", preferredStyle: .alert)
+                        
+                        let purchaseAction = UIAlertAction(title: "Purchase", style: .default) { (action) in
+                            self.attemptToBuyNoAds()
+                        }
+                        alertController.addAction(purchaseAction)
+                        
+                        let restoreAction = UIAlertAction(title: "Restore purchase", style: .default) { (action) in
+                            IAPHandler.shared.restorePurchase()
+                        }
+                        alertController.addAction(restoreAction)
+                        
+                        let closeAction = UIAlertAction(title: "Close", style: .cancel) { (action) in }
+                        alertController.addAction(closeAction)
+                        
+                        viewController.present(alertController, animated: true, completion: nil)
                     } else {
                         if !canPlay {
                             showCantPlayAlert()
@@ -281,6 +335,15 @@ class GameScene: BaseScene {
         scoreLabel.removeFromParent()
         pausedLabel.removeFromParent()
         
+        if !UserDefaults.standard.bool(forKey: "purchasedNoAds") {
+            if Reachability.isConnectedToNetwork() {
+                displayAd()
+            } else {
+                createBuyNoAdsBanner()
+                bannerPresent = true
+            }
+        }
+        
         showAllBaskets()
         
         let beatHighscore = checkForHighscore()
@@ -317,5 +380,27 @@ class GameScene: BaseScene {
         newScene.scaleMode = self.scaleMode
         self.view?.presentScene(newScene, transition: SKTransition.fade(withDuration: 1.0))
         newScene.viewController = self.viewController
+    }
+    
+    func displayAd() {
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "showAd"), object: nil)
+    }
+    
+    func attemptToBuyNoAds() {
+        if Reachability.isConnectedToNetwork() {
+            IAPHandler.shared.purchaseMyProduct(index: 0)
+        } else {
+            let alertView = UIAlertController(title: "Unable to purchase", message: "An internet connection is required to make the purchase.", preferredStyle: .alert)
+            let action = UIAlertAction(title: "OK", style: .default, handler: { (alert) in })
+            alertView.addAction(action)
+            self.viewController.present(alertView, animated: true, completion: nil)
+        }
+    }
+    
+    @objc func nothingToRestore() {
+        let alertView = UIAlertController(title: "Unable to restore", message: "There are no previous purchases to restore.", preferredStyle: .alert)
+        let action = UIAlertAction(title: "OK", style: .default, handler: { (alert) in })
+        alertView.addAction(action)
+        self.viewController.present(alertView, animated: true, completion: nil)
     }
 }

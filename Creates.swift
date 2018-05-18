@@ -90,6 +90,47 @@ extension GameScene {
         addChild(soundButton)
         addChild(loseSound)
     }
+    
+    func createNoAdsButton() {
+        noAds.size = Config.menuButton.size
+        noAds.position = Config.menuButton.positions[2]
+        menuElements.append(noAds)
+        addChild(noAds)
+    }
+    
+    func createBuyNoAdsBanner() {
+        bannerBackground = SKShapeNode(rect: CGRect(x: 0, y: 0, width: size.width, height: size.height))
+        bannerBackground.position = CGPoint(x: 0, y: 0)
+        bannerBackground.fillColor = SKColor.gray
+        bannerBackground.strokeColor = SKColor.black
+        bannerBackground.zPosition = 20
+        addChild(bannerBackground)
+        
+        noAdsLabel = createLabel(
+            text: "Remove ads by selecting",
+            fontColor: SKColor.white,
+            fontSize: size.width / 25,
+            xPos: size.width * 0.5,
+            yPos: size.height * 0.5,
+            zPosition: 21)
+        
+        noAdsLabel2 = createLabel(
+            text: "the option in the main menu!",
+            fontColor: SKColor.white,
+            fontSize: size.width / 25,
+            xPos: size.width * 0.5,
+            yPos: size.height * 0.4,
+            zPosition: 21)
+        
+        addChild(noAdsLabel)
+        addChild(noAdsLabel2)
+        
+        closeBannerButton.size = CGSize(width: size.width * 0.06, height: size.width * 0.06)
+        closeBannerButton.position = CGPoint(x: size.height * 0.1, y: size.height * 0.9)
+        closeBannerButton.zPosition = 21
+        
+        addChild(closeBannerButton)
+    }
 }
 
 extension TutorialScene {

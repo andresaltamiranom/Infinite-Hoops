@@ -18,7 +18,8 @@ final class Config {
     static let menuButton: (size: CGSize, positions: [CGPoint]) =
         (CGSize(width: screenSize.width * 0.065, height: screenSize.width * 0.065),
          [CGPoint(x: screenSize.width * 0.05, y: screenSize.height * 0.9 + screenSize.width * 0.065 * 0.2),
-          CGPoint(x: screenSize.width * 0.05, y: screenSize.height * 0.9 + screenSize.width * 0.065 * 0.2 - screenSize.width * 0.065 - screenSize.height * 0.05)
+          CGPoint(x: screenSize.width * 0.05, y: screenSize.height * 0.9 + screenSize.width * 0.065 * 0.2 - screenSize.width * 0.065 - screenSize.height * 0.05),
+          CGPoint(x: screenSize.width * 0.05, y: screenSize.height * 0.9 + screenSize.width * 0.065 * 0.2 - screenSize.width * 0.065 - screenSize.height * 0.05 - screenSize.width * 0.065 - screenSize.height * 0.05)
         ])
     
     static let shareButton: (size: CGSize, position: CGPoint) =

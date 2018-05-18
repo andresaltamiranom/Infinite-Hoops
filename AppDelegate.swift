@@ -7,17 +7,20 @@
 //
 
 import UIKit
+import GoogleMobileAds
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         UserDefaults.standard.register(defaults: ["highscore": 0])
         UserDefaults.standard.register(defaults: ["sound": true])
         UserDefaults.standard.register(defaults: ["completedTutorial": false])
+        UserDefaults.standard.register(defaults: ["purchasedNoAds": false])
+        
+        GADMobileAds.configure(withApplicationID: "ca-app-pub-8282617988296147~5836444605")
         
         return true
     }
